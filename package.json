@@ -1,0 +1,55 @@
+{
+  "name": "wonder",
+  "version": "1.0.0",
+  "description": "A JavaScript library for WebRTC applications that are using SigOFly",
+  "main": "dist/wonder.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist/wonder.js"
+  ],
+  "scripts": {
+    "build": "webpack",
+    "build-prod": "webpack -p",
+    "watch": "webpack --watch --watch-poll ",
+    "prepublish": "webpack -p"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bugs": {
+    "url": ""
+  },
+  "keywords": [
+    "WebRTC",
+    "Wonder",
+    "Signalling-On-the-fly",
+    "SigOfly",
+    "Telekom Innovation Laboratories",
+    "T-Labs",
+    "PT Inovação e Sistemas",
+    "TypeScript",
+    "JavaScript",
+    "Identity"
+  ],
+  "authors": [
+    "Johannes Hamfler <johannes@hamfler.com> (https://d-koppenhagen.de)",
+    "Danny Koppenhagen <mail@d-koppenhagen.de>"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "core-js": "^2.4.1",
+    "webrtc-adapter": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/webrtc": "~0.0.21",
+    "extract-text-webpack-plugin": "^2.1.2",
+    "ts-loader": "^2.0.0",
+    "tslint": "~5.4.3",
+    "typescript": "^2.3.4",
+    "typings": "^2.1.1",
+    "vanilla-typescript": "^0.2.0",
+    "webpack": "^2.2.0",
+    "webpack-build-notifier": "^0.1.13"
+  }
+}

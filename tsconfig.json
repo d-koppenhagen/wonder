@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "declaration": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "types" : [
+      "core-js",
+      "webrtc"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "demo"
+  ]
+}
+
