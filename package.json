@@ -11,7 +11,7 @@
     "build": "webpack",
     "build-prod": "webpack -p",
     "watch": "webpack --watch --watch-poll ",
-    "prepublish": "webpack -p"
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
@@ -39,17 +39,23 @@
   "license": "MIT",
   "dependencies": {
     "core-js": "^2.4.1",
-    "webrtc-adapter": "^4.0.1"
+    "webrtc-adapter": "^4.0.2"
   },
   "devDependencies": {
     "@types/webrtc": "~0.0.21",
+    "@types/jasmine": "~2.5.52",
     "extract-text-webpack-plugin": "^2.1.2",
-    "ts-loader": "^2.0.0",
+    "jasmine-core": "~2.6.4",
+    "karma": "~1.7.0",
+    "karma-chrome-launcher": "~2.1.1",
+    "karma-cli": "~1.0.1",
+    "karma-jasmine": "~1.1.0",
+    "karma-typescript": "3.0.4",
+    "ts-loader": "^2.1.0",
     "tslint": "~5.4.3",
     "typescript": "^2.3.4",
     "typings": "^2.1.1",
-    "vanilla-typescript": "^0.2.0",
     "webpack": "^2.2.0",
-    "webpack-build-notifier": "^0.1.13"
+    "webpack-build-notifier": "^0.1.14"
   }
 }

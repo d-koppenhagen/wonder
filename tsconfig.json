@@ -1,7 +1,10 @@
 {
+  "compileOnSave": false,
   "compilerOptions": {
     "target": "es5",
+    "sourceMap": true,
     "declaration": true,
+    "moduleResolution": "node",
     "typeRoots": [
       "node_modules/@types"
     ],
@@ -11,7 +14,8 @@
     ],
     "types" : [
       "core-js",
-      "webrtc"
+      "webrtc",
+      "jasmine"
     ]
   },
   "exclude": [
