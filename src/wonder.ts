@@ -1,19 +1,13 @@
 /** Declaration for using SystemJS to require moduels dynamically just if needed */
 declare const System: any;
 
-import {  } from 'modules/adapter';
 import { Conversation } from './modules/Conversation';
 import { Demand } from './modules/Demand';
-import { } from 'modules/helpfunctions';
 import { Identity } from './modules/Identity';
 import { Idp } from './modules/Idp';
 import { Message } from './modules/Message';
-import { } from './modules/MessageFactory';
 import { Participant } from './modules/Participant';
-import { } from './modules/RtcEvtHandler';
 import { MsgEvtHandler } from './modules/MsgEvtHandler';
-import { } from './modules/Types';
-import { } from './modules/DataChannelEvtHandler';
 import { CallSingle } from './modules/callSingle';
 import { CallMultiple } from './modules/CallMultiple';
 import { IWonderBaseConfig } from './interfaces/wonder-base-config';
