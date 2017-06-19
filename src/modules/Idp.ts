@@ -2,7 +2,7 @@
 declare const System: any;
 
 import { Identity } from './Identity';
-import { WebFinger } from 'webfinger.js';
+import { WebFinger } from 'webfinger-client';
 
 export class Idp {
   remoteIdp: string;
