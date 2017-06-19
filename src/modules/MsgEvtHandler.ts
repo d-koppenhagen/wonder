@@ -1,6 +1,8 @@
 /** Declaration for using SystemJS to require moduels dynamically just if needed */
 declare const System: any;
 
+import { attachMediaStream } from 'webrtc-adapter';
+
 import { Wonder } from '../wonder';
 import { Conversation } from './Conversation';
 import { Demand } from './Demand';
