@@ -54,7 +54,7 @@ export class DataChannelBroker {
     });
   }
 
-  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | Boolean): Promise<{}> | false {
+  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | Boolean): Promise<{}> {
     if ((payloadType === 'true') || !payloadType) { payloadType = PayloadType.plain; } // fallback to codec plain
     if (this.codecMap[from.rtcIdentity] &&
       this.codecMap[from.rtcIdentity][to.rtcIdentity] &&
@@ -63,7 +63,6 @@ export class DataChannelBroker {
       this.codecs[this.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType.toString()].url]) {
       return this.codecs[this.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType.toString()].url]; // return the codec
     }
-    return false; // if not found
   }
 
   removeDataChannelCodec(from: Identity, to: Identity, payloadType: string): Boolean {

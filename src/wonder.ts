@@ -12,6 +12,7 @@ import { CallSingle } from './modules/callSingle';
 import { CallMultiple } from './modules/CallMultiple';
 import { IWonderBaseConfig } from './interfaces/wonder-base-config';
 import { IDemand } from './interfaces/demand';
+import { ICodecStub } from './interfaces/codec-stub';
 
 export class Wonder {
   config: IWonderBaseConfig;
@@ -434,7 +435,10 @@ export class Wonder {
       if (!conversationId) {
         const remoteIdentity = that.conversations[0].remoteParticipants[0].identity;
         try {
-          that.conversations[0].dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type).send(msg);
+          that.conversations[0].dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
+            .then((codec: ICodecStub) => {
+              codec.send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
+            })
           resolve(true);
           if (successCallback) { successCallback(true); }
         } catch (err) {
@@ -448,7 +452,10 @@ export class Wonder {
         });
         if (conversation) { // and if it was found send the message
           const remoteIdentity = conversation.remoteParticipants[0].identity;
-          conversation.dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type).send(msg);
+          conversation.dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
+            .then((codec: ICodecStub) => {
+              codec.send(msg, conversation.dataChannelEvtHandler.dataChannel);
+            })
           resolve(true);
           if (successCallback) { successCallback(true); }
         } else { // and if not throw an error
