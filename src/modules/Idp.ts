@@ -1,6 +1,7 @@
 /** Declaration for using SystemJS to require moduels dynamically just if needed */
 declare const System: any;
 
+import { IMessagingStub } from '../interfaces/messaging-stub';
 import { Identity } from './Identity';
 import { WebFinger } from 'webfinger-client';
 
@@ -183,12 +184,12 @@ export class Idp {
     });
   }
 
-  getMsgStub(localMsgStubUrl: string): MessagingStub {
+  getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     const that = this;
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
     return new Promise(function(resolve, reject) {
-      System.import(localMsgStubUrl).then(msgStub => {
+      System.import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
           console.log('[Idp getMsgStub] received stub: ', msgStub);
           resolve(msgStub);
         }, error => {
