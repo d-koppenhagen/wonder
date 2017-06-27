@@ -2,7 +2,9 @@ import { Message } from '../modules/message';
 
 export interface IMessagingStub {
 
-  sendMessage(message: Message);
+  sendMessage(message: Message | Error);
+
+  onMessage();
 
   connect(
     ownRtcIdentity: string,
