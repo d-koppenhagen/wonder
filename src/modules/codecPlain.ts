@@ -1,4 +1,6 @@
-class Codec {
+import { ICodecStub } from '../interfaces/codec-stub';
+
+class Codec implements ICodecStub {
   constructor(
     public dataChannel: RTCDataChannel,
     public onMessage: Function

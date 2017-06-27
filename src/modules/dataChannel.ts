@@ -9,6 +9,7 @@ import { Conversation } from './Conversation';
 import { MessageFactory } from './MessageFactory';
 import { DataChannelBroker } from './DataChannelBroker';
 import { DataChannelEvtHandler } from './DataChannelEvtHandler';
+import { ICodecStub } from '../interfaces/codec-stub';
 
 export class DataChannel {
   static establish(wonderInstance: Wonder, recipient: string, conversation: Conversation, payloadType: string) {
