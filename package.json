@@ -43,8 +43,9 @@
     "webrtc-adapter": "^4.0.2"
   },
   "devDependencies": {
-    "@types/webrtc": "~0.0.21",
+    "@types/core-js": "~0.9.42",
     "@types/jasmine": "~2.5.52",
+    "@types/webrtc": "~0.0.21",
     "extract-text-webpack-plugin": "^2.1.2",
     "jasmine-core": "~2.6.4",
     "karma": "~1.7.0",

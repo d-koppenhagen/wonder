@@ -4,6 +4,7 @@ declare const System: any;
 import { IMessagingStub } from '../interfaces/messaging-stub';
 import { Identity } from './Identity';
 import { WebFinger } from 'webfinger-client';
+import { IJsonIdp } from '../interfaces/json-idp';
 
 export class Idp {
   remoteIdp: string;
@@ -65,7 +66,7 @@ export class Idp {
       console.log('[Idp askRemoteIdp] asking remote Idp...');
 
       if (that.remoteIdp === 'webfinger') {
-        System.import('./webfinger').then((WebFinger) => {
+        System.import('./webfinger').then((WebFinger: WebFinger) => {
           askWebFinger();
         }, error => {
           reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
@@ -149,7 +150,7 @@ export class Idp {
        * askOtherIdp is trying to connect to an IdP using the given IdP-options
        */
       function askJsonpIdp() {
-        System.import(that.remoteIdp + rtcIdentity).then(data => {
+        System.import(that.remoteIdp + rtcIdentity).then((data: IJsonIdp) => {
             console.log('[Idp askJsonpIdp] remote idp answered: ', data);
             localMsgStubUrl = data.rows[0].messagingStubURL;
             messagingServer = data.rows[0].messagingServer;

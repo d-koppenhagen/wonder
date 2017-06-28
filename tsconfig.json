@@ -14,8 +14,8 @@
     ],
     "types" : [
       "core-js",
-      "webrtc",
-      "jasmine"
+      "jasmine",
+      "webrtc"
     ]
   },
   "exclude": [
