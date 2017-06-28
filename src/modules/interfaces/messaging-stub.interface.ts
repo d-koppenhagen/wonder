@@ -2,6 +2,8 @@ import { Message } from '../Message';
 
 export interface IMessagingStub {
 
+  constructor(): void;
+
   sendMessage(message: Message | Error);
 
   onMessage();

@@ -66,7 +66,8 @@ export class Idp {
       console.log('[Idp askRemoteIdp] asking remote Idp...');
 
       if (that.remoteIdp === 'webfinger') {
-        System.import('./webfinger').then((WebFinger: WebFinger) => {
+        System.import('webfinger-client')
+        .then((WebFinger: WebFinger) => {
           askWebFinger();
         }, error => {
           reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));

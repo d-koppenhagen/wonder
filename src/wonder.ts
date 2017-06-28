@@ -209,7 +209,8 @@ export class Wonder {
         console.log('Muliparty calls are not supported jet');
 
         if (demand.out.video || demand.out.audio) {
-          System.import('./callMultiple').then(CallMultiple => {
+          System.import('./modules/callMultiple')
+          .then(CallMultiple => {
             CallMultiple.call(that, recipients, conversation)
               .then(function(cId) {
                 resolve(cId);
@@ -226,7 +227,8 @@ export class Wonder {
       } else if (typeof recipients === 'string' || recipients instanceof String) { // require file for a single call
         // start a video / audio call
         if (demand.out.video || demand.out.audio) {
-          System.import('./callSingle').then(CallSingle => {
+          System.import('./modules/callSingle')
+          .then(CallSingle => {
             CallSingle.call(that, recipients, conversation, demand)
               .then(function(cId: string) {
                 resolve(cId);
@@ -243,7 +245,8 @@ export class Wonder {
         }
         // start a data channel
         if (demand.out.data) {
-          System.import('./DataChannel').then(DataChannel => {
+          System.import('./modules/DataChannel')
+          .then(DataChannel => {
             // also hand over the data object to tell what payload type is wanted
             DataChannel.establish(that, recipients, conversation, demand.out.data)
               .then(function(cId) {

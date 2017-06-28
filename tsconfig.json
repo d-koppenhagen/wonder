@@ -5,6 +5,7 @@
     "sourceMap": true,
     "declaration": true,
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "lib": [
       "es2016",
       "dom"
@@ -15,9 +16,15 @@
       "webrtc"
     ]
   },
+  "files": [
+    "src/wonder.ts"
+  ],
   "include":[
     "src/**/*.ts",
     "node_modules/@types"
+  ],
+  "exclude": [
+    "node_modules/typescript" // should be golablly installed
   ]
 }
 
