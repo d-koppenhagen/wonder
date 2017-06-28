@@ -8,14 +8,14 @@ import { Idp } from './modules/Idp';
 import { Message } from './modules/Message';
 import { Participant } from './modules/Participant';
 import { MsgEvtHandler } from './modules/MsgEvtHandler';
-import { CallSingle } from './modules/callSingle';
+import { CallSingle } from './modules/CallSingle';
 import { CallMultiple } from './modules/CallMultiple';
-import { IWonderBaseConfig } from './interfaces/wonder-base-config';
-import { IDemand } from './interfaces/demand';
-import { ICodecStub } from './interfaces/codec-stub';
+import { IBaseConfig } from './modules/interfaces';
+import { IDemand } from './modules/interfaces/demand.interface';
+import { ICodec } from './modules/interfaces/codec.interface';
 
 export class Wonder {
-  config: IWonderBaseConfig;
+  config: IBaseConfig;
   conversations: Conversation[] = [];
   myIdentity: Identity = null;
   localIdp: Idp = null;
@@ -436,7 +436,7 @@ export class Wonder {
         const remoteIdentity = that.conversations[0].remoteParticipants[0].identity;
         try {
           that.conversations[0].dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-            .then((codec: ICodecStub) => {
+            .then((codec: ICodec) => {
               codec.send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
             })
           resolve(true);
@@ -453,7 +453,7 @@ export class Wonder {
         if (conversation) { // and if it was found send the message
           const remoteIdentity = conversation.remoteParticipants[0].identity;
           conversation.dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-            .then((codec: ICodecStub) => {
+            .then((codec: ICodec) => {
               codec.send(msg, conversation.dataChannelEvtHandler.dataChannel);
             })
           resolve(true);

@@ -1,10 +1,10 @@
 /** Declaration for using SystemJS to require moduels dynamically just if needed */
 declare const System: any;
 
-import { IMessagingStub } from '../interfaces/messaging-stub';
+import { IMessagingStub } from './interfaces';
 import { Identity } from './Identity';
 import { WebFinger } from 'webfinger-client';
-import { IJsonIdp } from '../interfaces/json-idp';
+import { IJsonIdp } from './interfaces';
 
 export class Idp {
   remoteIdp: string;

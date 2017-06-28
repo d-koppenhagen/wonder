@@ -1,8 +1,8 @@
-import { Message } from '../modules/message';
+import { Message } from '../Message';
 
 export interface IMessagingStub {
 
-  sendMessage(message: Message | Error);
+  sendMessage(message: typeof Message | Error);
 
   onMessage();
 

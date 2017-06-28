@@ -5,7 +5,7 @@ import { Participant } from './Participant';
 import { MsgEvtHandler } from './MsgEvtHandler';
 import { RtcEvtHandler } from './RtcEvtHandler';
 import { DataChannelEvtHandler } from './DataChannelEvtHandler';
-import { IMessagingStub } from '../interfaces/messaging-stub';
+import { IMessagingStub } from './interfaces';
 import { DataChannelBroker } from './DataChannelBroker';
 
 export class Conversation {

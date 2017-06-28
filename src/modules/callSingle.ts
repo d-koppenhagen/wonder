@@ -1,5 +1,5 @@
 import { Wonder } from '../Wonder';
-import { IDemand } from '../interfaces/demand';
+import { IDemand } from './interfaces';
 import { Demand } from './Demand';
 import { RtcEvtType } from './Types';
 import { Participant } from './Participant';

@@ -1,6 +1,6 @@
 import { Wonder } from '../Wonder';
 import { guid } from './helpfunctions';
-import { IDemand } from '../interfaces/demand';
+import { IDemand } from './interfaces';
 import { Demand } from './Demand';
 import { PayloadType } from './Types';
 import { Identity } from './Identity';
@@ -9,7 +9,7 @@ import { Conversation } from './Conversation';
 import { MessageFactory } from './MessageFactory';
 import { DataChannelBroker } from './DataChannelBroker';
 import { DataChannelEvtHandler } from './DataChannelEvtHandler';
-import { ICodecStub } from '../interfaces/codec-stub';
+import { ICodec } from './interfaces';
 
 export class DataChannel {
   static establish(wonderInstance: Wonder, recipient: string, conversation: Conversation, payloadType: string) {

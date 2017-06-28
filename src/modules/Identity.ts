@@ -1,4 +1,4 @@
-import { IMessagingStub } from '../interfaces/messaging-stub';
+import { IMessagingStub } from './interfaces';
 
 export class Identity {
   constructor(

@@ -1,4 +1,4 @@
-import { Wonder } from '../wonder';
+import { Wonder } from '../Wonder';
 import { Conversation } from './Conversation';
 import { DataChannelEvtType } from './Types';
 

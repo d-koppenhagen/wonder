@@ -1,4 +1,4 @@
-export interface ICodecStub {
+export interface ICodec {
 
   send(input: {}, dataChannel: RTCDataChannel);
 

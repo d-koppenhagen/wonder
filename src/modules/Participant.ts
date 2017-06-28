@@ -1,7 +1,7 @@
 import { Wonder } from '../wonder';
 import { Identity } from './Identity';
 import { Demand } from './Demand';
-import { IDemand } from '../interfaces/Demand';
+import { IDemand } from './interfaces';
 
 export class Participant {
   peerConnection: RTCPeerConnection = null;

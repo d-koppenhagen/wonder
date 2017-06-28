@@ -1,4 +1,4 @@
-import { IDemand } from '../interfaces/demand';
+import { IDemand } from './interfaces';
 
 export class Demand {
   /**

@@ -1,5 +1,5 @@
 import { Wonder } from '../Wonder';
-import { IDemand } from '../interfaces/demand';
+import { IDemand } from './interfaces';
 import { Participant } from './Participant';
 import { Conversation } from './Conversation';
 
