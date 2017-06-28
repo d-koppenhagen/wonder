@@ -1,4 +1,4 @@
-import { Wonder } from '../Wonder';
+import { Wonder } from '../wonder';
 import { IDemand } from './interfaces';
 import { Demand } from './Demand';
 import { RtcEvtType } from './Types';
@@ -10,10 +10,6 @@ export class CallSingle {
   static call(wonderInstance: Wonder, recipient: string, conversation: Conversation, demand: IDemand): Promise<String> {
     return new Promise(function(resolve, reject) {
       console.log(conversation);
-      // error handling
-      if (!(recipient instanceof String)) {
-        return new Error('false type of recipient');
-      }
 
       // create remote identity and participant
       wonderInstance.localIdp.getIdentity(recipient)

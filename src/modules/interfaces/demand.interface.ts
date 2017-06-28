@@ -4,7 +4,7 @@ export interface IDemand {
 }
 
 export interface IDemandSingleDirection {
-  audio?: Boolean;
-  video?: Boolean;
-  data?: Boolean | string;
+  audio?: boolean;
+  video?: boolean;
+  data?: boolean | string;
 }

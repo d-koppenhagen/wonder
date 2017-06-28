@@ -3,7 +3,7 @@ declare const System: any;
 
 import { attachMediaStream } from 'webrtc-adapter';
 
-import { Wonder } from '../Wonder';
+import { Wonder } from '../wonder';
 import { Conversation } from './Conversation';
 import { Demand } from './Demand';
 import { guid, errorHandler } from './helpfunctions';

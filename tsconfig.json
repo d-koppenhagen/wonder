@@ -5,9 +5,6 @@
     "sourceMap": true,
     "declaration": true,
     "moduleResolution": "node",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
     "lib": [
       "es2016",
       "dom"
@@ -18,9 +15,9 @@
       "webrtc"
     ]
   },
-  "exclude": [
-    "node_modules",
-    "demo"
+  "include":[
+    "src/**/*.ts",
+    "node_modules/@types"
   ]
 }
 

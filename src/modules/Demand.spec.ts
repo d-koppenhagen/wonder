@@ -1,4 +1,4 @@
-import { Demand } from './demand';
+import { Demand } from './Demand';
 
 describe('DemandClass', () => {
 
@@ -6,6 +6,6 @@ describe('DemandClass', () => {
 
         const demand = new Demand('audio');
 
-        expect(demand.converted()).toEqual('Hello world!');
+        expect(demand.converted()).toEqual(null);
     });
 });

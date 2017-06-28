@@ -1,4 +1,4 @@
-import { Wonder } from '../Wonder';
+import { Wonder } from '../wonder';
 import { IDemand } from './interfaces';
 import { Participant } from './Participant';
 import { Conversation } from './Conversation';

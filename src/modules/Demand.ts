@@ -25,7 +25,7 @@ export class Demand {
 
   private _converted: IDemand = null;
 
-  public get converted(){
+  public converted(): IDemand {
     return this._converted;
   }
 

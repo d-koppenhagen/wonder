@@ -8,8 +8,8 @@ import { Idp } from './modules/Idp';
 import { Message } from './modules/Message';
 import { Participant } from './modules/Participant';
 import { MsgEvtHandler } from './modules/MsgEvtHandler';
-import { CallSingle } from './modules/CallSingle';
-import { CallMultiple } from './modules/CallMultiple';
+import { CallSingle } from './modules/callSingle';
+import { CallMultiple } from './modules/callMultiple';
 import { IBaseConfig } from './modules/interfaces';
 import { IDemand } from './modules/interfaces/demand.interface';
 import { ICodec } from './modules/interfaces/codec.interface';
@@ -209,7 +209,7 @@ export class Wonder {
         console.log('Muliparty calls are not supported jet');
 
         if (demand.out.video || demand.out.audio) {
-          System.import('./CallMultiple').then(CallMultiple => {
+          System.import('./callMultiple').then(CallMultiple => {
             CallMultiple.call(that, recipients, conversation)
               .then(function(cId) {
                 resolve(cId);
@@ -226,7 +226,7 @@ export class Wonder {
       } else if (typeof recipients === 'string' || recipients instanceof String) { // require file for a single call
         // start a video / audio call
         if (demand.out.video || demand.out.audio) {
-          System.import('./CallSingle').then(CallSingle => {
+          System.import('./callSingle').then(CallSingle => {
             CallSingle.call(that, recipients, conversation, demand)
               .then(function(cId: string) {
                 resolve(cId);
@@ -436,9 +436,7 @@ export class Wonder {
         const remoteIdentity = that.conversations[0].remoteParticipants[0].identity;
         try {
           that.conversations[0].dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-            .then((codec: ICodec) => {
-              codec.send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
-            })
+          .send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
           resolve(true);
           if (successCallback) { successCallback(true); }
         } catch (err) {
@@ -453,9 +451,7 @@ export class Wonder {
         if (conversation) { // and if it was found send the message
           const remoteIdentity = conversation.remoteParticipants[0].identity;
           conversation.dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-            .then((codec: ICodec) => {
-              codec.send(msg, conversation.dataChannelEvtHandler.dataChannel);
-            })
+          .send(msg, conversation.dataChannelEvtHandler.dataChannel);
           resolve(true);
           if (successCallback) { successCallback(true); }
         } else { // and if not throw an error
