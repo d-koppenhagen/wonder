@@ -36,7 +36,7 @@ export class Demand {
   convertDemand(data: string|Array<string>|Object, demand: IDemand): IDemand {
 
     // case data is a string
-    if (data instanceof String) {
+    if (typeof data === 'string') {
       if (data === '' || data === 'all') {
         return demandAll();
       } else {
@@ -59,7 +59,7 @@ export class Demand {
     }
 
     function stringToDemand(stringData: string, dem: IDemand): IDemand {
-      console.log('[Demand convertDemand] converting String:', stringData, 'to Demand ', demand);
+      console.log('[Demand convertDemand] converting String:', stringData, 'to Demand ');
 
       if (dem.in.hasOwnProperty(stringData) && dem.out.hasOwnProperty(stringData)) {
         dem.in[stringData] = true;
@@ -108,18 +108,18 @@ export class Demand {
         }
         // if 'in' and 'out' is not specified, set attributes for both directions
       } else {
-        for (const prop in demand['in']) {
+        for (const prop in demand.in) {
           if (data.hasOwnProperty(prop)) {
             if (data[prop] === true || data[prop] === false  || data[prop] instanceof Object) {
-              demand['in'][prop] = data[prop];
-              demand['out'][prop] = data[prop];
+              demand.in[prop] = data[prop];
+              demand.out[prop] = data[prop];
             } else {
               if (typeof data[prop] === 'string' || data[prop] instanceof String) {// { data: 'plain' }
-                demand['in'][prop] = data[prop]; // {in: {data : 'plain'}}
-                demand['out'][prop] = data[prop]; // {in: {data : 'plain'}}
+                demand.in[prop] = data[prop]; // {in: {data : 'plain'}}
+                demand.out[prop] = data[prop]; // {in: {data : 'plain'}}
               } else {
-                demand['in'][prop] = false;
-                demand['out'][prop] = false;
+                demand.in[prop] = false;
+                demand.out[prop] = false;
               }
             }
           }
