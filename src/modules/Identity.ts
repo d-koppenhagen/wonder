@@ -7,7 +7,7 @@ export class Identity {
     public msgStub: IMessagingStub,
     public msgStubUrl: string,
     public msgSrv: string,
-    public codecs: {},
-    public credentials: {}
+    public codecs?: {},
+    public credentials?: {}
   ) {}
 }
