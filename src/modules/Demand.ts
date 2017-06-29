@@ -26,6 +26,7 @@ export class Demand {
   private _converted: IDemand = null;
 
   public converted(): IDemand {
+    console.log(`[Demand] converted: ${this._converted}`);
     return this._converted;
   }
 
@@ -59,8 +60,6 @@ export class Demand {
     }
 
     function stringToDemand(stringData: string, dem: IDemand): IDemand {
-      console.log('[Demand convertDemand] converting String:', stringData, 'to Demand ');
-
       if (dem.in.hasOwnProperty(stringData) && dem.out.hasOwnProperty(stringData)) {
         dem.in[stringData] = true;
         dem.out[stringData] = true;
@@ -69,8 +68,6 @@ export class Demand {
     }
 
     function arrayToDemand(arrayData: Array<string>, dem: IDemand): IDemand {
-      console.log('[Demand convertDemand] converting Array:', arrayData, 'to Demand');
-
       for (let i = 0; i < arrayData.length; i++) {
         if (dem.in.hasOwnProperty(arrayData[i]) && dem.out.hasOwnProperty(arrayData[i])) {
           dem.in[arrayData[i]] = true;
@@ -81,8 +78,6 @@ export class Demand {
     }
 
     function objectToDemand(objectData: Object, dem: IDemand): IDemand {
-      console.log('[Demand convertDemand] converting Object:', objectData, 'to Demand');
-
       // if already has the sub-objects 'in' and 'out'
       if (objectData.hasOwnProperty('in') || objectData.hasOwnProperty('out')) {
         // iterate through 'in' and 'out'
@@ -130,8 +125,6 @@ export class Demand {
     }
 
     function demandAll(): IDemand {
-      console.log('[Demand convertDemand] Wrong format:', data, 'using backup: set all to true');
-
       return {
         in : {
           'audio': true,
