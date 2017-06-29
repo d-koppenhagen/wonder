@@ -5,10 +5,18 @@ import { MaterialModule } from '@angular/material';
 import 'hammerjs';
 
 import { AppComponent } from './app.component';
+import { VideoBoxComponent } from './video-box/video-box.component';
+import { LogonFormComponent } from './logon-form/logon-form.component';
+import { ChatComponent } from './chat/chat.component';
+import { CallFormComponent } from './call-form/call-form.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    VideoBoxComponent,
+    LogonFormComponent,
+    ChatComponent,
+    CallFormComponent
   ],
   imports: [
     BrowserModule,
