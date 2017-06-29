@@ -16,9 +16,6 @@
       "webrtc"
     ]
   },
-  "files": [
-    "src/wonder.ts"
-  ],
   "include":[
     "src/**/*.ts",
     "node_modules/@types"
