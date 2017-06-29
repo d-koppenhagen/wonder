@@ -12,11 +12,10 @@
     ]
   },
   "include":[
-    "src/**/*.ts",
-    "node_modules/@types"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "node_modules/typescript" // should be golablly installed
+    "node_modules"
   ]
 }
 
