@@ -29,7 +29,7 @@ export class Demand {
     return this._converted;
   }
 
-  constructor(data: string|Array<String>|Object) {
+  constructor(data?: string|Array<String>|Object) {
     this._converted = this.convertDemand(data, this.defaultDemand);
   }
 
