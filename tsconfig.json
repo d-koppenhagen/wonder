@@ -9,11 +9,6 @@
     "lib": [
       "es2016",
       "dom"
-    ],
-    "types" : [
-      "core-js",
-      "jasmine",
-      "webrtc"
     ]
   },
   "include":[
