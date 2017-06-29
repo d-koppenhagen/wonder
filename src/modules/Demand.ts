@@ -10,7 +10,7 @@ export class Demand {
    * var demand = new Demand({in: 'video', out: 'audio'}); // demands incoming video and outgoing audio
    * var demand = new Demand({out:{data:true,video:false}}}); // demands only an outgoing data channel
    */
-  defaultDemand: IDemand = {
+  private _defaultDemand: IDemand = {
     in: {
       audio: false,
       video: false,
@@ -25,125 +25,125 @@ export class Demand {
 
   private _converted: IDemand = null;
 
-  public converted(): IDemand {
+  constructor(data?: string | Array<String> | Object) {
+    this._converted = this._convertDemand(data);
+  }
+
+  converted(): IDemand {
     console.log(`[Demand] converted: ${this._converted}`);
     return this._converted;
   }
 
-  constructor(data?: string|Array<String>|Object) {
-    this._converted = this.convertDemand(data, this.defaultDemand);
-  }
-
-  convertDemand(data: string|Array<string>|Object, demand: IDemand): IDemand {
+  private _convertDemand(data: string | Array<string> | Object): IDemand {
 
     // case data is a string
     if (typeof data === 'string') {
       if (data === '' || data === 'all') {
-        return demandAll();
+        return this._demandAll();
       } else {
-        return stringToDemand(data, demand);
+        return this._stringToDemand(data, this._defaultDemand);
       }
     } else if (data instanceof Array) { // case data is an array of Strings
       if (data.length === 0) {
-        return demandAll();
+        return this._demandAll();
       } else {
-        return arrayToDemand(data, demand);
+        return this._arrayToDemand(data, this._defaultDemand);
       }
     } else if (data instanceof Object) { // case data is an Object
       if (data === null || data === undefined || Object.keys(data).length === 0) {
-        return demandAll();
+        return this._demandAll();
       } else {
-        return objectToDemand(data, demand);
+        return this._objectToDemand(data, this._defaultDemand);
       }
     } else {
-      return demandAll();
+      return this._demandAll();
     }
 
-    function stringToDemand(stringData: string, dem: IDemand): IDemand {
-      if (dem.in.hasOwnProperty(stringData) && dem.out.hasOwnProperty(stringData)) {
-        dem.in[stringData] = true;
-        dem.out[stringData] = true;
+  }
+
+  private _stringToDemand(stringData: string, dem: IDemand): IDemand {
+    if (dem.in.hasOwnProperty(stringData) && dem.out.hasOwnProperty(stringData)) {
+      dem.in[stringData] = true;
+      dem.out[stringData] = true;
+    }
+    return dem;
+  }
+
+  private _arrayToDemand(arrayData: Array<string>, dem: IDemand): IDemand {
+    for (let i = 0; i < arrayData.length; i++) {
+      if (dem.in.hasOwnProperty(arrayData[i]) && dem.out.hasOwnProperty(arrayData[i])) {
+        dem.in[arrayData[i]] = true;
+        dem.out[arrayData[i]] = true;
       }
-      return dem;
     }
+    return dem;
+  }
 
-    function arrayToDemand(arrayData: Array<string>, dem: IDemand): IDemand {
-      for (let i = 0; i < arrayData.length; i++) {
-        if (dem.in.hasOwnProperty(arrayData[i]) && dem.out.hasOwnProperty(arrayData[i])) {
-          dem.in[arrayData[i]] = true;
-          dem.out[arrayData[i]] = true;
-        }
-      }
-      return dem;
-    }
-
-    function objectToDemand(objectData: Object, dem: IDemand): IDemand {
-      // if already has the sub-objects 'in' and 'out'
-      if (objectData.hasOwnProperty('in') || objectData.hasOwnProperty('out')) {
-        // iterate through 'in' and 'out'
-        for (const direction in dem) {
-          // iterate through demand types ('audio', 'video', 'data')
-          if (objectData.hasOwnProperty(direction)) {
-            for (const prop in dem[direction]) {
-              if (objectData[direction].hasOwnProperty(prop)) {
-                if (objectData[direction][prop] === true
-                  || objectData[direction][prop] === false
-                  || objectData[direction][prop] instanceof Object) {
-                  dem[direction][prop] = objectData[direction][prop];
+  private _objectToDemand(objectData: Object, dem: IDemand): IDemand {
+    // if already has the sub-objects 'in' and 'out'
+    if (objectData.hasOwnProperty('in') || objectData.hasOwnProperty('out')) {
+      // iterate through 'in' and 'out'
+      for (const direction in dem) {
+        // iterate through demand types ('audio', 'video', 'data')
+        if (objectData.hasOwnProperty(direction)) {
+          for (const prop in dem[direction]) {
+            if (objectData[direction].hasOwnProperty(prop)) {
+              if (objectData[direction][prop] === true
+                || objectData[direction][prop] === false
+                || objectData[direction][prop] instanceof Object) {
+                dem[direction][prop] = objectData[direction][prop];
+              } else {
+                if (prop === 'data') {
+                  dem[direction][prop] = objectData[direction][prop]; // { data: 'chat' }
                 } else {
-                  if (prop === 'data') {
-                    dem[direction][prop] = objectData[direction][prop]; // { data: 'chat' }
-                  } else {
-                    dem[direction][prop] = false;
-                  }
+                  dem[direction][prop] = false;
                 }
               }
             }
           }
         }
-        // if 'in' and 'out' is not specified, set attributes for both directions
-      } else {
-        for (const prop in demand.in) {
-          if (data.hasOwnProperty(prop)) {
-            if (data[prop] === true || data[prop] === false  || data[prop] instanceof Object) {
-              demand.in[prop] = data[prop];
-              demand.out[prop] = data[prop];
+      }
+      // if 'in' and 'out' is not specified, set attributes for both directions
+    } else {
+      for (const prop in this._defaultDemand.in) {
+        if (objectData.hasOwnProperty(prop)) {
+          if (objectData[prop] === true || objectData[prop] === false || objectData[prop] instanceof Object) {
+            this._defaultDemand.in[prop] = objectData[prop];
+            this._defaultDemand.out[prop] = objectData[prop];
+          } else {
+            if (typeof objectData[prop] === 'string' || objectData[prop] instanceof String) {// { data: 'plain' }
+              this._defaultDemand.in[prop] = objectData[prop]; // {in: {data : 'plain'}}
+              this._defaultDemand.out[prop] = objectData[prop]; // {in: {data : 'plain'}}
             } else {
-              if (typeof data[prop] === 'string' || data[prop] instanceof String) {// { data: 'plain' }
-                demand.in[prop] = data[prop]; // {in: {data : 'plain'}}
-                demand.out[prop] = data[prop]; // {in: {data : 'plain'}}
-              } else {
-                demand.in[prop] = false;
-                demand.out[prop] = false;
-              }
+              this._defaultDemand.in[prop] = false;
+              this._defaultDemand.out[prop] = false;
             }
           }
         }
       }
-
-      return dem;
     }
+    return dem;
+  }
 
-    function demandAll(): IDemand {
-      return {
-        in : {
-          'audio': true,
-          'video': true,
-          'data': true
-        },
-        out: {
-          'audio': true,
-          'video': true,
-          'data': true
-        }
-      };
+  private _demandAll(): IDemand {
+    return {
+      in: {
+        'audio': true,
+        'video': true,
+        'data': true
+      },
+      out: {
+        'audio': true,
+        'video': true,
+        'data': true
+      }
+    };
 
-    }
   }
 
   updateDemandAllow(targetDemand: IDemand, additionalDemand: IDemand): IDemand {
-    targetDemand     = this.convertDemand(targetDemand    , this.defaultDemand);
-    additionalDemand = this.convertDemand(additionalDemand, this.defaultDemand);
+    targetDemand = this._convertDemand(targetDemand);
+    additionalDemand = this._convertDemand(additionalDemand);
 
     // iterate through 'in' and 'out'
     for (const direction in targetDemand) {
@@ -161,8 +161,8 @@ export class Demand {
   }
 
   updateDemandDisallow(targetDemand: IDemand, restrictiveDemand: IDemand): IDemand {
-    targetDemand      = this.convertDemand(targetDemand     , this.defaultDemand);
-    restrictiveDemand = this.convertDemand(restrictiveDemand, this.defaultDemand);
+    targetDemand = this._convertDemand(targetDemand);
+    restrictiveDemand = this._convertDemand(restrictiveDemand);
 
     // iterate through 'in' and 'out'
     for (const direction in targetDemand) {
@@ -178,6 +178,5 @@ export class Demand {
     }
     return targetDemand;
   }
-
 
 }
