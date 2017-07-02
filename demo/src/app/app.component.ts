@@ -8,9 +8,17 @@ import { Wonder } from 'wonder';
   providers: [ Wonder ]
 })
 export class AppComponent {
-  title = 'app';
-
-  constructor(wonder: Wonder) {
+  constructor(public wonder: Wonder) {
     console.log(wonder);
+  }
+
+  login(loginData: string) {
+    this.wonder.login(loginData)
+        .then(function(data) {
+          console.log(data);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
   }
 }

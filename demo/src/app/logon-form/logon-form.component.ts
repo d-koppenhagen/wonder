@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-logon-form',
@@ -6,10 +6,16 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./logon-form.component.css']
 })
 export class LogonFormComponent implements OnInit {
+  @Output() data: EventEmitter<any> = new EventEmitter();
+  loginData: string = null;
 
   constructor() { }
 
   ngOnInit() {
+  }
+
+  submitForm() {
+    this.data.emit(this.loginData);
   }
 
 }
