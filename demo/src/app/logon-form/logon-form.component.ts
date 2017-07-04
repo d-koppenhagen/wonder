@@ -7,7 +7,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 })
 export class LogonFormComponent implements OnInit {
   @Output() data: EventEmitter<any> = new EventEmitter();
-  loginData: string = null;
+  loginData = 'user@localhost:9110';
 
   constructor() { }
 
