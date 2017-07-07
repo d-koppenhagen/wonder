@@ -1,0 +1,17 @@
+{
+  "name": "web-rtcdemo-simple",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "lite-server",
+    "postinstall": "npm link ../",
+    "postupdate": "npm link ../"
+  },
+  "private": true,
+  "dependencies": {
+    "wonder": "*"
+  },
+  "devDependencies": {
+    "lite-server": "^2.3.0"
+  }
+}
