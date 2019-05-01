@@ -184,28 +184,10 @@ export class Idp {
   }
 
   getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
-    const that = this;
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
-
-
     return new Promise(function(resolve, reject) {
-      console.log('test');
-
-      const $script = require('scriptjs');
-      $script(localMsgStubUrl, function(res) {
-        console.log('loaded', res);
-      });
-
-      /*import(['lazy!' + localMsgStubUrl], (mod) => {
-        console.log('got stub', mod);
-      }, (err) => {
-        console.log('error while loading stub', err);
-      });*/
-
-
-
-      /*import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
+      import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
           console.log('[Idp getMsgStub] received stub: ', msgStub);
           resolve(msgStub);
         }, error => {
@@ -214,7 +196,7 @@ export class Idp {
             possibly a malformed URL or the server is unreachable: ${error}`
           ));
         }
-      );*/
+      );
     });
   }
 }
