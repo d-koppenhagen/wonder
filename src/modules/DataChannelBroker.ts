@@ -1,6 +1,5 @@
 declare const System: any;
 
-import { Wonder } from '../wonder';
 import { Identity } from './Identity';
 import { PayloadType } from './Types';
 import { ICodec } from './interfaces';
@@ -55,7 +54,7 @@ export class DataChannelBroker {
     });
   }
 
-  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | Boolean): ICodec {
+  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | Boolean | {[key: string]: any}): ICodec {
     if ((payloadType === 'true') || !payloadType) { payloadType = PayloadType.plain; } // fallback to codec plain
     if (this.codecMap[from.rtcIdentity] &&
       this.codecMap[from.rtcIdentity][to.rtcIdentity] &&

@@ -1,5 +1,3 @@
-declare var RTCDataChannel;
-
 import { Wonder } from '../wonder';
 import { Conversation } from './Conversation';
 import { DataChannelEvtType } from './Types';

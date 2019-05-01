@@ -1,8 +1,6 @@
 /** Declaration for using SystemJS to require moduels dynamically just if needed */
 declare const System: any;
-declare let define: any;
 declare let require: any;
-declare let MessagingStub: any;
 if (typeof require.ensure !== 'function') { require.ensure = (d, c) => c(require) }
 
 import { IMessagingStub } from './interfaces';

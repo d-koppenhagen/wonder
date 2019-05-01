@@ -12,7 +12,7 @@ export class RtcEvtHandler {
     public conversation: Conversation
   ) { }
 
-  onEvt(evt: { type; candidate: any }) {
+  onEvt(evt: { type: string; candidate: any; channel?: any }) {
     const that = this;
 
     switch (evt.type) {
@@ -26,24 +26,23 @@ export class RtcEvtHandler {
 
       case RtcEvtType.onnegotiationneeded:
         console.log('[RtcEvtHandler onEvt] onnegotiationneeded', evt);
-        that.conversation.myParticipant.peerConnection.createOffer(
-          offer => {
-            that.conversation.myParticipant.peerConnection.setLocalDescription(
-              offer,
-              () => {
-                const m = MessageFactory.updateSdp(
-                  that.conversation.myParticipant.identity,
-                  that.conversation.remoteParticipants[0].identity,
-                  that.conversation.id,
-                  offer
-                );
-                that.conversation.msgStub.sendMessage(m);
-              },
-              errorHandler
+        that.conversation.myParticipant.peerConnection.createOffer().then((offer) => {
+          return that.conversation.myParticipant.peerConnection.setLocalDescription(offer)
+            .then(() => {
+            const m = MessageFactory.updateSdp(
+              that.conversation.myParticipant.identity,
+              that.conversation.remoteParticipants[0].identity,
+              that.conversation.id,
+              offer
             );
-          },
-          errorHandler
-        );
+            that.conversation.msgStub.sendMessage(m);
+          }).catch((reason) => {
+            errorHandler(reason);
+          });
+        })
+        .catch((reason) => {
+          errorHandler(reason);
+        });
         break;
 
       case RtcEvtType.onicecandidate:

@@ -292,9 +292,12 @@ export class MsgEvtHandler {
   establishRtcConnection(wonderInstance: Wonder, conversation: Conversation, msg: Message) {
     // conversation.remoteParticipants[0].demand.out needs to be updated too
     navigator.mediaDevices.getUserMedia(msg.misc.demand.in)
-      .then(function(stream) {
+      .then((stream: MediaStream) => {
         attachMediaStream(document.getElementById('localVideo'), stream);
-        conversation.myParticipant.peerConnection.addStream(stream);
+
+        stream.getTracks().forEach(function(track) {
+          conversation.myParticipant.peerConnection.addTrack(track, stream);
+        });
 
         // set the descriptiopn of alice
         conversation.myParticipant.peerConnection.setRemoteDescription(

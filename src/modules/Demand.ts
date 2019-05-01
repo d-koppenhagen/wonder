@@ -25,7 +25,7 @@ export class Demand {
 
   private _converted: IDemand = null;
 
-  constructor(data?: string | Array<String> | Object) {
+  constructor(data?: string | string[] | Object) {
     this._converted = this._convertDemand(data);
   }
 
@@ -34,7 +34,7 @@ export class Demand {
     return this._converted;
   }
 
-  private _convertDemand(data: string | Array<string> | Object): IDemand {
+  private _convertDemand(data: string | string[] | Object): IDemand {
 
     // case data is a string
     if (typeof data === 'string') {
@@ -43,7 +43,7 @@ export class Demand {
       } else {
         return this._stringToDemand(data, this._defaultDemand);
       }
-    } else if (data instanceof Array) { // case data is an array of Strings
+    } else if (data instanceof Array) { // case data is an array of strings
       if (data.length === 0) {
         return this._demandAll();
       } else {
@@ -69,7 +69,7 @@ export class Demand {
     return dem;
   }
 
-  private _arrayToDemand(arrayData: Array<string>, dem: IDemand): IDemand {
+  private _arrayToDemand(arrayData: string[], dem: IDemand): IDemand {
     for (let i = 0; i < arrayData.length; i++) {
       if (dem.in.hasOwnProperty(arrayData[i]) && dem.out.hasOwnProperty(arrayData[i])) {
         dem.in[arrayData[i]] = true;

@@ -1,15 +1,12 @@
 import { Wonder } from '../wonder';
 import { guid } from './helpfunctions';
 import { IDemand } from './interfaces';
-import { Demand } from './Demand';
-import { PayloadType } from './Types';
 import { Identity } from './Identity';
 import { Participant } from './Participant';
 import { Conversation } from './Conversation';
 import { MessageFactory } from './MessageFactory';
 import { DataChannelBroker } from './DataChannelBroker';
 import { DataChannelEvtHandler } from './DataChannelEvtHandler';
-import { ICodec } from './interfaces';
 
 export class DataChannel {
   static establish(wonderInstance: Wonder, recipient: string, conversation: Conversation, payloadType: string) {
@@ -45,7 +42,7 @@ export class DataChannel {
             resolve();
           } else {
             // if it is another server then create a new connection
-            conversation.msgStub = new identity.msgStub.constructor; // use the remote identity's msgStub
+            conversation.msgStub = identity.msgStub.constructor(); // use the remote identity's msgStub
 
             // connect the stub of the conversation to the remote server
             conversation.msgStub.connect(

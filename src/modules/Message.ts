@@ -1,16 +1,15 @@
 import { Identity } from './Identity';
 import { guid } from './helpfunctions';
-import { IDemand } from './interfaces';
 
 export class Message {
   id: string;
 
   constructor(
     public from: Identity,
-    public to: Identity|Array<Identity>,
+    public to: Identity|Identity[],
     public type: string,
     public conversationId: string,
-    public misc?: any // String | { RTCIceCandidateInit; demand?: IDemand; sessionDescription?: any }
+    public misc?: any // string | { RTCIceCandidateInit; demand?: IDemand; sessionDescription?: any }
   ) {
     this.id = guid();
   }

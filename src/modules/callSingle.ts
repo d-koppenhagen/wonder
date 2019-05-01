@@ -7,7 +7,7 @@ import { Conversation } from './Conversation';
 import { MessageFactory } from './MessageFactory';
 
 export class CallSingle {
-  static call(wonderInstance: Wonder, recipient: string, conversation: Conversation, demand: IDemand): Promise<String> {
+  static call(wonderInstance: Wonder, recipient: string, conversation: Conversation, demand: IDemand): Promise<string> {
     return new Promise(function(resolve, reject) {
       console.log(conversation);
 
@@ -57,7 +57,9 @@ export class CallSingle {
             channel: stream
           }
           conversation.rtcEvtHandler.onEvt(evt);
-          conversation.myParticipant.peerConnection.addStream(stream); // add the stream to the peer connection to send it later on
+          stream.getTracks().forEach(function(track) { // add the stream to the peer connection to send it later on
+            conversation.myParticipant.peerConnection.addTrack(track, stream);
+          });
           conversation.myParticipant.peerConnection.createOffer( // create the sdp offer now for both participants
             function(offer) {
               console.log('[callSingle] offer from alice: ', offer.sdp);
@@ -84,8 +86,8 @@ export class CallSingle {
               console.log(error);
               reject(error);
             }, {
-              offerToReceiveAudio: 1,
-              offerToReceiveVideo: 1
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true
             }
           ); // create offer ends here
           resolve(conversation.id);

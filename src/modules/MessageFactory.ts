@@ -1,14 +1,14 @@
 import { Identity } from './Identity';
 import { Message } from './Message';
 import { MessageType } from './Types';
-import { guid } from './helpfunctions';
+import { IDemand } from './interfaces';
 
 export class MessageFactory {
   static invitation(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string,
-    demand: Object,
+    demand: IDemand,
     sessionDescription: Object
   ): Message | Error {
     if (!(from instanceof Identity)) {
@@ -17,12 +17,6 @@ export class MessageFactory {
     if (!(to instanceof Identity || to instanceof Array && !to.find(function (i) {
       return !(i instanceof Identity)
     }))) { return new Error('[MessageFactory.invitation] to should be an instance of Identity or an Array with Identities'); }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.invitation] conversationId should be a string');
-    }
-    if (!(typeof demand === 'object' || demand instanceof Object)) {
-      return new Error('[MessageFactory.invitation] demand should be an object');
-    }
 
     const misc = {
       'demand': demand,
@@ -33,7 +27,7 @@ export class MessageFactory {
 
   static accepted(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string,
     demand: Object,
     sessionDescription: Object
@@ -46,12 +40,6 @@ export class MessageFactory {
     }))) {
       return new Error('[MessageFactory.accepted] to should be an instance of Identity or an Array with Identities');
     }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.accepted] conversationId should be a string');
-    }
-    if (!(typeof demand === 'object' || demand instanceof Object)) {
-      return new Error('[MessageFactory.accepted] demand should be an object');
-    }
 
     const misc = {
       'demand': demand,
@@ -62,7 +50,7 @@ export class MessageFactory {
 
   static declined(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string
   ): Message | Error {
     console.log(from, to, conversationId);
@@ -74,16 +62,13 @@ export class MessageFactory {
     }))) {
       return new Error('[MessageFactory.declined] to should be an instance of Identity or an Array with Identities');
     }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.declined] conversationId should be a string');
-    }
 
     return new Message(from, to, MessageType.declined, conversationId);
   }
 
   static bye(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string
   ): Message | Error {
     if (!(from instanceof Identity)) {
@@ -94,16 +79,13 @@ export class MessageFactory {
     }))) {
       return new Error('[MessageFactory.bye] to should be an instance of Identity or an Array with Identities');
     }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.bye] conversationId should be a string');
-    }
 
     return new Message(from, to, MessageType.bye, conversationId);
   }
 
   static updateConstraints(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string,
     demand: Object
   ): Message | Error {
@@ -115,12 +97,6 @@ export class MessageFactory {
     }))) {
       return new Error('[MessageFactory.updateConstraints] to should be an instance of Identity or an Array with Identities');
     }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.updateConstraints] conversationId should be a string');
-    }
-    if (!(typeof demand === 'object' || demand instanceof Object)) {
-      return new Error('[MessageFactory.updateConstraints] demand should be an object');
-    }
     const misc = {
       'demand': demand,
     }
@@ -129,7 +105,7 @@ export class MessageFactory {
 
   static updateIceCandidates(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string,
     iceCandidates: Object
   ): Message | Error {
@@ -141,16 +117,13 @@ export class MessageFactory {
     }))) {
       return new Error('[MessageFactory.updateIceCandidates] to should be an instance of Identity or an Array with Identities');
     }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.updateIceCandidates] conversationId should be a string');
-    }
 
     return new Message(from, to, MessageType.connectivityCandidate, conversationId, iceCandidates);
   }
 
   static updateSdp(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string,
     sdp: Object
   ): Message | Error {
@@ -162,9 +135,6 @@ export class MessageFactory {
     }))) {
       return new Error('[MessageFactory.updateConstraints] to should be an instance of Identity or an Array with Identities');
     }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.updateConstraints] conversationId should be a string');
-    }
     const misc = {
       'sdp': sdp,
     }
@@ -173,7 +143,7 @@ export class MessageFactory {
 
   static presence(
     from: Identity,
-    to: Identity | Array<Identity>,
+    to: Identity | Identity[],
     conversationId: string,
     status: string
   ): Message | Error {
@@ -184,9 +154,6 @@ export class MessageFactory {
       return !(i instanceof Identity)
     }))) {
       return new Error('[MessageFactory.presence] to should be an instance of Identity or an Array with Identities');
-    }
-    if (!(typeof conversationId === 'string' || conversationId instanceof String)) {
-      return new Error('[MessageFactory.presence] conversationId should be a string');
     }
 
     return new Message(from, to, MessageType.presence, conversationId);

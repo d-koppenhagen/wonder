@@ -8,11 +8,8 @@ import { Idp } from './modules/Idp';
 import { Message } from './modules/Message';
 import { Participant } from './modules/Participant';
 import { MsgEvtHandler } from './modules/MsgEvtHandler';
-import { CallSingle } from './modules/callSingle';
-import { CallMultiple } from './modules/callMultiple';
 import { IBaseConfig } from './modules/interfaces';
 import { IDemand } from './modules/interfaces/demand.interface';
-import { ICodec } from './modules/interfaces/codec.interface';
 
 export class Wonder {
   config: IBaseConfig;
@@ -142,11 +139,11 @@ export class Wonder {
   }
 
   call(
-    recipients: Array<String>|String,
-    rawDemand: string|Array<String>|Object|Demand,
+    recipients: string[]|string,
+    rawDemand: string|string[]|Object|Demand,
     conversationId: string, successCallback: Function,
     errorCallback: Function
-  ): Promise<String> {
+  ): Promise<string> {
     const that = this;
     let errMsg = null;
 
@@ -177,8 +174,6 @@ export class Wonder {
           )
         );
       }
-      if (recipients instanceof Array) { return new Error('[wonder call] multiparty no yet implemented'); }
-
       let conversation = null;
 
       if (!existingConversation) {
@@ -206,7 +201,7 @@ export class Wonder {
       if (recipients instanceof Array) {
         // TODO: implement multiparty support
 
-        console.log('Muliparty calls are not supported jet');
+        console.error('[wonder call] multiparty no yet implemented')
 
         if (demand.out.video || demand.out.audio) {
           System.import('./modules/callMultiple')
@@ -224,7 +219,7 @@ export class Wonder {
               });
           });
         }
-      } else if (typeof recipients === 'string' || recipients instanceof String) { // require file for a single call
+      } else if (typeof recipients === 'string') { // require file for a single call
         // start a video / audio call
         if (demand.out.video || demand.out.audio) {
           System.import('./modules/callSingle')
@@ -277,11 +272,11 @@ export class Wonder {
    * TODO: implement
 
   removeRecipients(
-    recipients: Array.<String>|String,
+    recipients: Array.<string>|string,
     conversationId: string,
     successCallback: function,
     errorCallback: function
-  ): Promise<String>|function(conversationId: string) {
+  ): Promise<string>|function(conversationId: string) {
     var that = this;
     var errMsg = null;
 
@@ -314,7 +309,7 @@ export class Wonder {
     conversationId: string,
     successCallback: function,
     errorCallback: function
-  ): Promise<String>|function(conversationId: string) {
+  ): Promise<string>|function(conversationId: string) {
     var that = this;
     var errMsg = null;
 
@@ -339,7 +334,7 @@ export class Wonder {
     conversationId: string,
     successCallback: function,
     errorCallback: function
-  ): Promise<String>|function(conversationId: string) {
+  ): Promise<string>|function(conversationId: string) {
     var that = this;
     var errMsg = null;
 
@@ -471,7 +466,7 @@ export class Wonder {
     action: Boolean,
     successCallback: Function,
     errorCallback: Function
-  ): Promise<String> {
+  ): Promise<string> {
     const that = this;
     let errMsg = null;
 
