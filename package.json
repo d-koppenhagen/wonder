@@ -2,8 +2,8 @@
   "name": "wonder",
   "version": "1.0.0",
   "description": "A JavaScript library for WebRTC applications that are using SigOFly",
-  "main": "dist/wonder.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/bundle.js",
+  "types": "dist/bundle.d.ts",
   "files": [
     "dist/wonder.js"
   ],
@@ -35,30 +35,14 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "core-js": "^2.4.1",
-    "scriptjs": "^2.5.8",
     "webfinger.js": "^2.7.0",
-    "webrtc-adapter": "^4.2.2"
+    "webrtc-adapter": "^7.2.3"
   },
   "devDependencies": {
-    "@types/core-js": "~0.9.42",
-    "@types/jasmine": "~2.5.52",
-    "@types/node": "^6.0.83",
     "@types/webpack": "^3.0.4",
     "@types/webrtc": "~0.0.21",
-    "extract-text-webpack-plugin": "^2.1.2",
-    "jasmine-core": "~2.6.4",
-    "karma": "~1.7.0",
-    "karma-chrome-launcher": "~2.1.1",
-    "karma-cli": "~1.0.1",
-    "karma-jasmine": "~1.1.0",
-    "karma-typescript": "3.0.4",
-    "ts-loader": "^2.3.0",
-    "ts-node": "^3.2.0",
-    "tslint": "~5.4.3",
-    "typescript": "^2.4.1",
-    "typings": "^2.1.1",
-    "webpack": "^2.2.0",
-    "webpack-build-notifier": "^0.1.14"
+    "tslint": "~5.16.0",
+    "typescript": "^3.4.5",
+    "webpack": "^4.30.0"
   }
 }
