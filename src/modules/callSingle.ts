@@ -5,6 +5,7 @@ import { RtcEvtType } from './Types';
 import { Participant } from './Participant';
 import { Conversation } from './Conversation';
 import { MessageFactory } from './MessageFactory';
+import { errorHandler } from './helpfunctions';
 
 export class CallSingle {
   static call(wonderInstance: Wonder, recipient: string, conversation: Conversation, demand: IDemand): Promise<string> {
@@ -60,12 +61,11 @@ export class CallSingle {
           stream.getTracks().forEach(function(track) { // add the stream to the peer connection to send it later on
             conversation.myParticipant.peerConnection.addTrack(track, stream);
           });
-          conversation.myParticipant.peerConnection.createOffer( // create the sdp offer now for both participants
-            function(offer) {
+          conversation.myParticipant.peerConnection.createOffer().then( // create the sdp offer now for both participants
+            (offer) => {
               console.log('[callSingle] offer from alice: ', offer.sdp);
-              conversation.myParticipant.peerConnection.setLocalDescription( // now set the peer connection description
-                offer, // with the local offer
-                function() {
+              conversation.myParticipant.peerConnection.setLocalDescription(offer).then( // now set the peer connection description
+                () => {
                   console.log('[callSingle] local description success');
                   const msg = MessageFactory.invitation( // create the message for the remote participant
                     conversation.myParticipant.identity,
@@ -75,21 +75,19 @@ export class CallSingle {
                     offer // include the sdp offer for bob
                   );
                   conversation.msgStub.sendMessage(msg); // and send the mesage
-                },
-                function(error) {
-                  console.log(error);
-                  reject(error);
-                }
-              );
-            },
-            function(error) {
-              console.log(error);
-              reject(error);
-            }, {
+                }).catch((reason) => {
+                  errorHandler(reason);
+                });
+              })
+              .catch((reason) => {
+                errorHandler(reason);
+              });
+
+            /*{
               offerToReceiveAudio: true,
               offerToReceiveVideo: true
-            }
-          ); // create offer ends here
+            }*/
+          // create offer ends here
           resolve(conversation.id);
         })
         .catch(function(error) {
@@ -99,10 +97,6 @@ export class CallSingle {
 
         resolve(conversation.id); // return the conversationId if everything went right
       })
-      .catch(function(error) {
-        reject(new Error(`[callSingle] error: ${error}`));
-      }); // promise returned by getIdentity ends here
-
-    }); // callSingle promise will be returned here
+    });
   }
 }

@@ -5,7 +5,7 @@ if (typeof require.ensure !== 'function') { require.ensure = (d, c) => c(require
 
 import { IMessagingStub } from './interfaces';
 import { Identity } from './Identity';
-import { WebFinger } from 'webfinger-client';
+import { WebFinger } from 'webfinger.js';
 import { IJsonIdp } from './interfaces';
 
 export class Idp {
@@ -68,7 +68,7 @@ export class Idp {
       console.log('[Idp askRemoteIdp] asking remote Idp...');
 
       if (that.remoteIdp === 'webfinger') {
-        System.import('webfinger-client')
+        System.import('webfinger.js')
         .then((WebFinger: WebFinger) => {
           askWebFinger();
         }, error => {
