@@ -4,7 +4,15 @@ export interface IDemand {
 }
 
 export interface IDemandSingleDirection {
-  audio?: boolean;
-  video?: boolean;
-  data?: boolean | string;
+  audio?: boolean | { [key: string]: any };
+  video?: boolean | { [key: string]: any };
+  data?: boolean | { [key: string]: any } | string;
 }
+
+export type AudioVideoDataAll = 'audio'| 'video'| 'data' | 'all' | '';
+export type AudioVideoDataType = 'audio'| 'video'| 'data';
+
+export type RawDemand =
+  AudioVideoDataAll |
+  AudioVideoDataType[] |
+  {[key in AudioVideoDataType]: any};

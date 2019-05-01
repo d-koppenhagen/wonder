@@ -64,6 +64,7 @@ export class MsgEvtHandler {
         } else {
           console.log('[MsgEvtHandler onMessage] invitation is legit, creating a new conversation');
           const conversation = new Conversation(that.wonderInstance);
+          const dem = new Demand(msg.misc.demand)
           const myParticipant = new Participant(that.wonderInstance, that.wonderInstance.myIdentity, new Demand(msg.misc.demand).converted);
           conversation.id = msg.conversationId; // when we receive an invitation an id is already present, so use it
           conversation.myParticipant = myParticipant; // my local bob participant

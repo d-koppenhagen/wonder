@@ -29,7 +29,7 @@ export class Demand {
     this._converted = this._convertDemand(data);
   }
 
-  converted(): IDemand {
+  get converted(): IDemand {
     console.log(`[Demand] converted: ${this._converted}`);
     return this._converted;
   }

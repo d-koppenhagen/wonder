@@ -8,10 +8,10 @@ const PATHS = {
   build: path.join(__dirname, './dist')
 };
 
-module.exports = {
 
+module.exports = {
   entry: {
-    'wonder': PATHS.src + '/wonder.ts'
+    wonder: PATHS.src + '/wonder'
   },
   output: {
     path: PATHS.build,
@@ -28,10 +28,23 @@ module.exports = {
       }
     ]
   },
+  externals: {
+    MessagingStub: 'MessagingStub'
+
+    //MessagingStub: /^(http|ftp|https):\/\/.*\.js/
+        /*function(context, request, callback) {
+      if (/^(http|ftp|https):\/\/.*.js/.test(request)){
+        console.log(request);
+        return callback(null, 'commonjs ' + request);
+      }
+      callback();
+    }*/
+  },
   resolve: {
     extensions: ['.ts', '.js']
   },
   plugins: [
-    new WebpackBuildNotifierPlugin()
+    new WebpackBuildNotifierPlugin(),
+    new webpack.HotModuleReplacementPlugin()
   ]
 };

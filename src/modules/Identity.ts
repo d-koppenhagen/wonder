@@ -1,5 +1,5 @@
 import { IMessagingStub } from './interfaces';
-
+import { PayloadType } from './Types';
 export class Identity {
   constructor(
     public rtcIdentity: string,
@@ -7,7 +7,7 @@ export class Identity {
     public msgStub: IMessagingStub,
     public msgStubUrl: string,
     public msgSrv: string,
-    public codecs?: {},
-    public credentials?: {}
+    public codecs?: { [key in PayloadType]?: string },
+    public credentials?: any
   ) {}
 }

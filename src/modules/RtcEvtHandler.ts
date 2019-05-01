@@ -12,7 +12,7 @@ export class RtcEvtHandler {
     public conversation: Conversation
   ) { }
 
-  onEvt(evt: { type; candidate; channel }) {
+  onEvt(evt: { type; candidate: any }) {
     const that = this;
 
     switch (evt.type) {
@@ -27,10 +27,10 @@ export class RtcEvtHandler {
       case RtcEvtType.onnegotiationneeded:
         console.log('[RtcEvtHandler onEvt] onnegotiationneeded', evt);
         that.conversation.myParticipant.peerConnection.createOffer(
-          function(offer) {
+          offer => {
             that.conversation.myParticipant.peerConnection.setLocalDescription(
               offer,
-              function() {
+              () => {
                 const m = MessageFactory.updateSdp(
                   that.conversation.myParticipant.identity,
                   that.conversation.remoteParticipants[0].identity,

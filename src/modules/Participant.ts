@@ -18,7 +18,7 @@ export class Participant {
 
   setRtcPeerConnection(rtcPeerConnection: RTCPeerConnection) {
     this.peerConnection = rtcPeerConnection;
-    this.peerConnection.onaddstream = this.wonderInstance.conversations[0]
+    this.peerConnection.ontrack = this.wonderInstance.conversations[0]
       .rtcEvtHandler.onEvt.bind(this.wonderInstance.conversations[0].rtcEvtHandler);
     this.peerConnection.onicecandidate = this.wonderInstance.conversations[0]
       .rtcEvtHandler.onEvt.bind(this.wonderInstance.conversations[0].rtcEvtHandler);

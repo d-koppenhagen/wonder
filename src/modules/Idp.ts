@@ -1,5 +1,9 @@
 /** Declaration for using SystemJS to require moduels dynamically just if needed */
 declare const System: any;
+declare let define: any;
+declare let require: any;
+declare let MessagingStub: any;
+if (typeof require.ensure !== 'function') { require.ensure = (d, c) => c(require) }
 
 import { IMessagingStub } from './interfaces';
 import { Identity } from './Identity';
@@ -190,8 +194,25 @@ export class Idp {
     const that = this;
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
+
+
     return new Promise(function(resolve, reject) {
-      System.import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
+      console.log('test');
+
+      const $script = require('scriptjs');
+      $script(localMsgStubUrl, function(res) {
+        console.log('loaded', res);
+      });
+
+      /*require(['lazy!' + localMsgStubUrl], (mod) => {
+        console.log('got stub', mod);
+      }, (err) => {
+        console.log('error while loading stub', err);
+      });*/
+
+
+
+      /*System.import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
           console.log('[Idp getMsgStub] received stub: ', msgStub);
           resolve(msgStub);
         }, error => {
@@ -200,7 +221,7 @@ export class Idp {
             possibly a malformed URL or the server is unreachable: ${error}`
           ));
         }
-      );
+      );*/
     });
   }
 }

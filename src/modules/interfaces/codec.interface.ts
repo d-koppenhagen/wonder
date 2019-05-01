@@ -1,7 +1,6 @@
 declare var RTCDataChannel;
 export interface ICodec {
-
-  send(input: {}, dataChannel: RTCDataChannel);
-
-  onDataMessage(dataMsg: string);
+  constructor(dataChannel: RTCDataChannel, onMessage: () => void): void;
+  send(input: any, dataChannel: RTCDataChannel): void;
+  onDataMessage(dataMsg: any): void;
 }

@@ -23,7 +23,7 @@ export class CallSingle {
           console.log('[callSingle] already connected to the remote participants msgServer');
         } else {
           // if its another server create a new connection
-          conversation.msgStub = new identity.msgStub.constructor; // use the remote identity's msgStub
+          conversation.msgStub = identity.msgStub.constructor(); // use the remote identity's msgStub
           // connect the stub of the conversation to the remote server
           conversation.msgStub.connect(
             wonderInstance.myIdentity.rtcIdentity, // use my rtcIdentity to connect to the remote server

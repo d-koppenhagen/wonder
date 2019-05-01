@@ -1,20 +1,14 @@
 import { Message } from '../Message';
 
 export interface IMessagingStub {
-
-  constructor(): void;
-
-  sendMessage(message: Message | Error);
-
-  onMessage();
-
+  constructor(): IMessagingStub;
+  sendMessage(message: Message | Error): void;
   connect(
     ownRtcIdentity: string,
-    credentials: {} | null,
-    msgSrv: string,
-    callbackFunction: Function
-  );
-
-  disconnect();
-
+    credentials?: any,
+    msgSrv?: string,
+    callbackFunction?: () => void
+  ): void;
+  disconnect(): void;
+  onMessage(msg: Message): void;
 }
