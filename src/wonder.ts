@@ -1,6 +1,3 @@
-/** Declaration for using SystemJS to require moduels dynamically just if needed */
-declare const System: any;
-
 import { Conversation } from './modules/Conversation';
 import { Demand } from './modules/Demand';
 import { Identity } from './modules/Identity';
@@ -204,57 +201,57 @@ export class Wonder {
         console.error('[wonder call] multiparty no yet implemented')
 
         if (demand.out.video || demand.out.audio) {
-          System.import('./modules/callMultiple')
-          .then(CallMultiple => {
-            CallMultiple.call(that, recipients, conversation)
-              .then(function(cId) {
-                resolve(cId);
-                if (successCallback) { successCallback(cId) };
-              })
-              .catch(function(error) {
-                errMsg = new Error(`[WONDER call] Error in callMultiple occured: ${error}`);
-                reject(errMsg);
-                if (errorCallback) { errorCallback(errMsg); }
-                return;
-              });
-          });
+          import('./modules/callMultiple')
+            .then((CallMultiple: any) => {
+              CallMultiple.call(that, recipients, conversation)
+                .then(function(cId) {
+                  resolve(cId);
+                  if (successCallback) { successCallback(cId) };
+                })
+                .catch(function(error) {
+                  errMsg = new Error(`[WONDER call] Error in callMultiple occured: ${error}`);
+                  reject(errMsg);
+                  if (errorCallback) { errorCallback(errMsg); }
+                  return;
+                });
+            });
         }
       } else if (typeof recipients === 'string') { // require file for a single call
         // start a video / audio call
         if (demand.out.video || demand.out.audio) {
-          System.import('./modules/callSingle')
-          .then(CallSingle => {
-            CallSingle.call(that, recipients, conversation, demand)
-              .then(function(cId: string) {
-                resolve(cId);
-                if (successCallback) { successCallback(cId); }
-              })
-              .catch(function(error) {
-                errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
-                reject(errMsg);
-                if (errorCallback) { errorCallback(errMsg) };
-                return;
-              });
-          });
+          import('./modules/callSingle')
+            .then((CallSingle: any) => {
+              CallSingle.call(that, recipients, conversation, demand)
+                .then(function(cId: string) {
+                  resolve(cId);
+                  if (successCallback) { successCallback(cId); }
+                })
+                .catch(function(error) {
+                  errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
+                  reject(errMsg);
+                  if (errorCallback) { errorCallback(errMsg) };
+                  return;
+                });
+            });
 
         }
         // start a data channel
         if (demand.out.data) {
-          System.import('./modules/DataChannel')
-          .then(DataChannel => {
-            // also hand over the data object to tell what payload type is wanted
-            DataChannel.establish(that, recipients, conversation, demand.out.data)
-              .then(function(cId) {
-                resolve(conversationId);
-                if (successCallback) {successCallback(conversationId); }
-              })
-              .catch(function(error) {
-                errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
-                reject(errMsg);
-                if (errorCallback) { errorCallback(errMsg); }
-                return;
-              });
-          });
+          import('./modules/DataChannel')
+            .then((DataChannel: any) => {
+              // also hand over the data object to tell what payload type is wanted
+              DataChannel.establish(that, recipients, conversation, demand.out.data)
+                .then(function(cId) {
+                  resolve(conversationId);
+                  if (successCallback) {successCallback(conversationId); }
+                })
+                .catch(function(error) {
+                  errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
+                  reject(errMsg);
+                  if (errorCallback) { errorCallback(errMsg); }
+                  return;
+                });
+            });
         }
       } else {
         errMsg = new Error('[WONDER call] cannot determine wether it is a multi or single party call');

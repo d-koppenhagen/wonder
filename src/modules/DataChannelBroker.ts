@@ -1,5 +1,3 @@
-declare const System: any;
-
 import { Identity } from './Identity';
 import { PayloadType } from './Types';
 import { ICodec } from './interfaces';
@@ -8,6 +6,8 @@ import { DataChannelEvtHandler } from './DataChannelEvtHandler';
 export class DataChannelBroker {
   codecMap = {};
   codecs = {};
+
+  constructor() {}
 
   addDataChannelCodec(
     from: Identity,
@@ -92,7 +92,7 @@ export class DataChannelBroker {
         resolve(that.codecs[codecUrl]);
         return;
       } else { // if it isn't present download the codec with the URL
-        System.import(codecUrl).then((codec: ICodec) => {
+        import(codecUrl).then((codec: ICodec) => {
           that.codecs[codecUrl] = codec; // save it locally
           resolve(codec); // and return it
         }, error => { // failed to receive the codec

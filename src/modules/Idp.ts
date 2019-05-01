@@ -1,8 +1,3 @@
-/** Declaration for using SystemJS to require moduels dynamically just if needed */
-declare const System: any;
-declare let require: any;
-if (typeof require.ensure !== 'function') { require.ensure = (d, c) => c(require) }
-
 import { IMessagingStub } from './interfaces';
 import { Identity } from './Identity';
 import { WebFinger } from 'webfinger.js';
@@ -68,12 +63,12 @@ export class Idp {
       console.log('[Idp askRemoteIdp] asking remote Idp...');
 
       if (that.remoteIdp === 'webfinger') {
-        System.import('webfinger.js')
-        .then((WebFinger: WebFinger) => {
-          askWebFinger();
-        }, error => {
-          reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
-        });
+        import('webfinger.js')
+          .then((WebFinger: WebFinger) => {
+            askWebFinger();
+          }, error => {
+            reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
+          });
       } else {
         askJsonpIdp();
       }
@@ -153,7 +148,7 @@ export class Idp {
        * askOtherIdp is trying to connect to an IdP using the given IdP-options
        */
       function askJsonpIdp() {
-        System.import(that.remoteIdp + rtcIdentity).then((data: IJsonIdp) => {
+        import(that.remoteIdp + rtcIdentity).then((data: IJsonIdp) => {
             console.log('[Idp askJsonpIdp] remote idp answered: ', data);
             localMsgStubUrl = data.rows[0].messagingStubURL;
             messagingServer = data.rows[0].messagingServer;
@@ -202,7 +197,7 @@ export class Idp {
         console.log('loaded', res);
       });
 
-      /*require(['lazy!' + localMsgStubUrl], (mod) => {
+      /*import(['lazy!' + localMsgStubUrl], (mod) => {
         console.log('got stub', mod);
       }, (err) => {
         console.log('error while loading stub', err);
@@ -210,7 +205,7 @@ export class Idp {
 
 
 
-      /*System.import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
+      /*import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
           console.log('[Idp getMsgStub] received stub: ', msgStub);
           resolve(msgStub);
         }, error => {

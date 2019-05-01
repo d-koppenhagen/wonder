@@ -1,6 +1,3 @@
-/** Declaration for using SystemJS to require moduels dynamically just if needed */
-declare const System: any;
-
 import { attachMediaStream } from 'webrtc-adapter';
 
 import { Wonder } from '../wonder';
@@ -191,10 +188,11 @@ export class MsgEvtHandler {
       console.log('Datachannel already present for a 2 party conversation');
       return;
     }
-    System.import('./DataChannelBroker').then(dataChannelBroker => {
+    import('./DataChannelBroker')
+      .then((dataChannelBroker: any) => {
         console.log(dataChannelBroker);
         // assign the dataChannelBroker to the conversation for later reference
-        conversation.dataChannelBroker = dataChannelBroker;
+        conversation.dataChannelBroker = dataChannelBroker.constructor();
 
         const dataChannelEvtHandler = new DataChannelEvtHandler(wonderInstance, conversation); // create a new handler for the data channel
 
