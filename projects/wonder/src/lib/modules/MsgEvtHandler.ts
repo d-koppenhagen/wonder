@@ -9,9 +9,10 @@ import { Participant } from './Participant';
 import { Message } from './Message';
 import { MessageFactory } from './MessageFactory';
 import { MessageType } from './Types';
+import { Identity } from './Identity';
 
 export class MsgEvtHandler {
-  ice: Boolean = false;
+  ice = false;
 
   constructor(
     public wonderInstance: Wonder,
@@ -28,7 +29,7 @@ export class MsgEvtHandler {
           if (that.conversation.id === msg.conversationId) { // and the conversatinId is matching then add new constaints/fulfill the demand
             console.log('[MsgEvtHandler onMessage] invitation is legit, updating conversation');
             that.wonderInstance.localIdp.getIdentity(msg.from.rtcIdentity)
-            .then(function(identity) {
+            .then((identity: Identity) => {
               const remoteParticipant = that.conversation.getRemoteParticipant(identity);
 
               console.log('remote demand: ', msg.misc.demand);
@@ -42,14 +43,14 @@ export class MsgEvtHandler {
                 //    !remoteParticipant.demand.in.audio && !remoteParticipant.demand.out.audio)
 
                 // only establish the connection when video or audio hasnt been created
-                  that.establishRtcConnection(that.wonderInstance, that.conversation, msg);
+                that.establishRtcConnection(that.wonderInstance, that.conversation, msg);
               }
               // create as many datachannels as the remote user wants
               if (msg.misc.demand.in.data || msg.misc.demand.out.data) {
                 that.establishDataChannel(that.wonderInstance, that.conversation, msg);
               }
             })
-            .catch(function(error){
+            .catch((error) => {
               console.error(error);
             });
           } else {
@@ -61,7 +62,6 @@ export class MsgEvtHandler {
         } else {
           console.log('[MsgEvtHandler onMessage] invitation is legit, creating a new conversation');
           const conversation = new Conversation(that.wonderInstance);
-          const dem = new Demand(msg.misc.demand)
           const myParticipant = new Participant(that.wonderInstance, that.wonderInstance.myIdentity, new Demand(msg.misc.demand).converted);
           conversation.id = msg.conversationId; // when we receive an invitation an id is already present, so use it
           conversation.myParticipant = myParticipant; // my local bob participant
@@ -75,7 +75,7 @@ export class MsgEvtHandler {
 
           // get the remote identity
           that.wonderInstance.localIdp.getIdentity(msg.from.rtcIdentity)
-          .then(function(identity) {
+          .then((identity: Identity) => {
             // Add participant and set the RTCPeerConnection
             conversation.addRemoteParticipant(new Participant(that.wonderInstance, identity, msg.misc.demand));
             conversation.myParticipant.setRtcPeerConnection(
@@ -94,11 +94,11 @@ export class MsgEvtHandler {
               }
             }
           })
-          .then(function(){
+          .then(() => {
             that.wonderInstance.onMessage(msg); // user interface for message events
             return;
           })
-          .catch(function(error) {
+          .catch((error) => {
             return error;
           });
         }
@@ -202,7 +202,7 @@ export class MsgEvtHandler {
           msg.misc.demand.in.data, // with the codec of the remote participant || or plain
           dataChannelEvtHandler // and the handler of the channel
         )
-        .then(function(codec){
+        .then((codec) => {
           // get the codec
           codec = dataChannelBroker.getDataChannelCodec(
             conversation.myParticipant.identity,
@@ -225,11 +225,11 @@ export class MsgEvtHandler {
 
           // override the functions which may be defined in the required codec to standard ones for correct functionality
           // when the data channel is ready then assign the codec's onDataMessage function to the channel
-          codec.dataChannel.onopen = function(evt) {
+          codec.dataChannel.onopen = (evt) => {
             if (codec.dataChannel.readyState === 'open') {
               codec.dataChannel.onmessage = codec.onDataMessage.bind(codec);
             }
-          }
+          };
 
           // register the data channel handler and bind its class as 'this' inside the function
           codec.dataChannel.onclose = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
@@ -248,93 +248,72 @@ export class MsgEvtHandler {
           that.ice = false;
 
           // set the description of alice
-          conversation.myParticipant.peerConnection.setRemoteDescription(
-            new RTCSessionDescription(msg.misc.sessionDescription),
-            function() {
+          conversation.myParticipant.peerConnection.setRemoteDescription(new RTCSessionDescription(msg.misc.sessionDescription))
+            .then(() => {
               console.log('[MsgEvtHandler establishDataChannel] set remote description success');
-            },
-            errorHandler
-          );
-          console.log(conversation.remoteParticipants);
-          console.log(conversation.myParticipant);
-          // and create my own afterwards (bobs description/answer)
-          conversation.myParticipant.peerConnection.createAnswer(
-            function(answer) {
-              conversation.myParticipant.peerConnection.setLocalDescription(
-                answer,
-                function() {
-                  // and send it to alice when we are ready
-                  const m = MessageFactory.accepted(
-                    conversation.myParticipant.identity,
-                    conversation.remoteParticipants[0].identity,
-                    conversation.id,
-                    conversation.remoteParticipants[0].demand,
-                    answer
-                  );
-                  conversation.msgStub.sendMessage(m);
-                },
-                errorHandler
+              return navigator.mediaDevices.getUserMedia(msg.misc.demand.in);
+            })
+            .then((stream) => {
+              console.log(conversation.remoteParticipants);
+              console.log(conversation.myParticipant);
+            })
+            .then(() => {
+              return conversation.myParticipant.peerConnection.createAnswer();
+            })
+            .then((answer) => {
+              return conversation.myParticipant.peerConnection.setLocalDescription(answer);
+            })
+            .then(() => {
+              const m = MessageFactory.accepted(
+                conversation.myParticipant.identity,
+                conversation.remoteParticipants[0].identity,
+                conversation.id,
+                conversation.remoteParticipants[0].demand,
+                conversation.myParticipant.peerConnection.localDescription
               );
-            },
-            errorHandler
-          );
+              conversation.msgStub.sendMessage(m);
+            })
+            .catch(errorHandler);
         })
-        .catch(function(err){
-          console.log(err);
-        });
-      }, error => {
-        console.error(error);
-      });
+        .catch(errorHandler);
+      }, errorHandler);
   }
 
   establishRtcConnection(wonderInstance: Wonder, conversation: Conversation, msg: Message) {
     // conversation.remoteParticipants[0].demand.out needs to be updated too
-    navigator.mediaDevices.getUserMedia(msg.misc.demand.in)
+
+    conversation.myParticipant.peerConnection.setRemoteDescription(new RTCSessionDescription(msg.misc.sessionDescription))
+      .then(() => {
+        console.log('[MsgEvtHandler establishRtcConnection] set remote descriptiopn success');
+        return navigator.mediaDevices.getUserMedia(msg.misc.demand.in);
+      })
       .then((stream: MediaStream) => {
         attachMediaStream(document.getElementById('localVideo'), stream);
-
-        stream.getTracks().forEach(function(track) {
+        stream.getTracks().forEach((track) => {
           conversation.myParticipant.peerConnection.addTrack(track, stream);
         });
-
-        // set the descriptiopn of alice
-        conversation.myParticipant.peerConnection.setRemoteDescription(
-          new RTCSessionDescription(msg.misc.sessionDescription),
-          function() {
-            console.log('[MsgEvtHandler establishRtcConnection] set remote descriptiopn success');
-          },
-          errorHandler
-        );
-
-        // and create my own afterwards
-        conversation.myParticipant.peerConnection.createAnswer(
-          function(answer) {
-            conversation.myParticipant.peerConnection.setLocalDescription(
-              answer,
-              function() {
-                // and send it to alice when we are ready
-                console.log('conversation.remoteParticipants[0].demand', conversation.remoteParticipants[0].demand);
-                const m = MessageFactory.accepted(
-                  conversation.myParticipant.identity,
-                  conversation.remoteParticipants[0].identity,
-                  conversation.id,
-                  conversation.remoteParticipants[0].demand,
-                  answer
-                );
-                conversation.msgStub.sendMessage(m);
-              },
-              errorHandler
-            );
-          },
-          errorHandler
-        );
       })
-      .catch(function(error) {
-        return error;
-      });
+      .then(() => {
+        return conversation.myParticipant.peerConnection.createAnswer();
+      })
+      .then((answer) => {
+        console.log('conversation.remoteParticipants[0].demand', conversation.remoteParticipants[0].demand);
+        return conversation.myParticipant.peerConnection.setLocalDescription(answer);
+      })
+      .then(() => {
+        const m = MessageFactory.accepted(
+          conversation.myParticipant.identity,
+          conversation.remoteParticipants[0].identity,
+          conversation.id,
+          conversation.remoteParticipants[0].demand,
+          conversation.myParticipant.peerConnection.localDescription
+        );
+        conversation.msgStub.sendMessage(m);
+      })
+      .catch(errorHandler);
   }
 
-  answerRequest(msg: Message, permission: Boolean) {
+  answerRequest(msg: Message, permission: boolean) {
     const that = this;
     console.log('[MsgEvtHandler answerRequest] permission granted: ', permission);
     // choose the right method
