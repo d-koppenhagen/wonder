@@ -70,16 +70,16 @@ export class Wonder {
 
   login(
     myRtcIdentity: string,
-    credentials: Object,
-    successCallback: Function,
-    errorCallback: Function
+    credentials: { [key: string]: any } | string,
+    successCallback?: (identity: Identity) => void,
+    errorCallback?: (errorMessage: string) => void
   ): Promise<Identity> {
     const that = this;
     let errMsg = null;
 
     console.log('[WONDER login] login with:', myRtcIdentity);
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
 
       // errorCallback handling
       if (!myRtcIdentity) {
@@ -104,7 +104,7 @@ export class Wonder {
       }
 
       that.localIdp.getIdentity(myRtcIdentity, credentials)
-        .then(function(identity) {
+        .then((identity: Identity) => {
           console.log('[WONDER login]: got identity: ', identity);
           that.myIdentity = identity;
           const invitationHandler = new MsgEvtHandler(that); // we need to receive invitations
@@ -118,7 +118,7 @@ export class Wonder {
             identity.rtcIdentity,
             identity.credentials,
             identity.msgSrv,
-            function() { // successCallback connecting
+            () => { // successCallback connecting
               console.log('[WONDER login] connected to msgServer of identity: ', identity);
               resolve(identity);
               if (successCallback) { successCallback(identity); }
@@ -126,7 +126,7 @@ export class Wonder {
           );
 
         })
-        .catch(function(err) { // possibly a network errorCallback
+        .catch((err: any) => { // possibly a network errorCallback
           errMsg = new Error(`[WONDER login] ${err}`);
           reject(errMsg);
           if (errorCallback) { errorCallback(errMsg); }
@@ -137,14 +137,15 @@ export class Wonder {
 
   call(
     recipients: string[]|string,
-    rawDemand: string|string[]|Object|Demand,
-    conversationId: string, successCallback: Function,
-    errorCallback: Function
+    rawDemand: string|string[]|{ [key: string]: any } | Demand,
+    conversationId: string,
+    successCallback?: (conversationId: string) => void,
+    errorCallback?: (errorMessage: string) => void
   ): Promise<string> {
     const that = this;
     let errMsg = null;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       // errorCallback handling
       if (!recipients) {
         errMsg = new Error('[WONDER call] no recipients');
@@ -155,7 +156,7 @@ export class Wonder {
       if (!rawDemand) {
         errMsg = new Error('[WONDER call] no demand');
         reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg) };
+        if (errorCallback) { errorCallback(errMsg); }
         return;
       }
 
@@ -181,8 +182,7 @@ export class Wonder {
         that.conversations.push(conversation); // add the conversation to wonder
         conversation.myParticipant.setRtcPeerConnection(
           new RTCPeerConnection({
-            'iceServers': that.config.ice // name of key needs to be iceServers in RTCPeerConnection
-            // , dataChannelOptions
+            iceServers: that.config.ice // name of key needs to be iceServers in RTCPeerConnection
           })
         );
       } else {
@@ -191,24 +191,24 @@ export class Wonder {
       }
 
       // set ice handling to false before receiving all sdp messages to avoid ICE errors
-      this.conversation.msgEvtHandler.ice = false;
+      conversation.msgEvtHandler.ice = false;
 
       // dynamically load a file for a specific use case
       // require file for a multiparty call
       if (recipients instanceof Array) {
         // TODO: implement multiparty support
 
-        console.error('[wonder call] multiparty no yet implemented')
+        console.error('[wonder call] multiparty no yet implemented');
 
         if (demand.out.video || demand.out.audio) {
           import('./modules/callMultiple')
             .then((CallMultiple: any) => {
               CallMultiple.call(that, recipients, conversation)
-                .then(function(cId) {
+                .then((cId: string) => {
                   resolve(cId);
-                  if (successCallback) { successCallback(cId) };
+                  if (successCallback) { successCallback(cId); }
                 })
-                .catch(function(error) {
+                .catch((error) => {
                   errMsg = new Error(`[WONDER call] Error in callMultiple occured: ${error}`);
                   reject(errMsg);
                   if (errorCallback) { errorCallback(errMsg); }
@@ -222,14 +222,14 @@ export class Wonder {
           import('./modules/callSingle')
             .then((CallSingle: any) => {
               CallSingle.call(that, recipients, conversation, demand)
-                .then(function(cId: string) {
+                .then((cId: string) => {
                   resolve(cId);
                   if (successCallback) { successCallback(cId); }
                 })
-                .catch(function(error) {
+                .catch((error: any) => {
                   errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
                   reject(errMsg);
-                  if (errorCallback) { errorCallback(errMsg) };
+                  if (errorCallback) { errorCallback(errMsg); }
                   return;
                 });
             });
@@ -241,11 +241,11 @@ export class Wonder {
             .then((DataChannel: any) => {
               // also hand over the data object to tell what payload type is wanted
               DataChannel.establish(that, recipients, conversation, demand.out.data)
-                .then(function(cId) {
+                .then((cId: string) => {
                   resolve(conversationId);
                   if (successCallback) {successCallback(conversationId); }
                 })
-                .catch(function(error) {
+                .catch((error: any) => {
                   errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
                   reject(errMsg);
                   if (errorCallback) { errorCallback(errMsg); }
@@ -263,95 +263,75 @@ export class Wonder {
   }
 
 
-
-  /**
-   * !!! not implemented yet
-   * TODO: implement
-
   removeRecipients(
-    recipients: Array.<string>|string,
+    recipients: string[]|string,
     conversationId: string,
-    successCallback: function,
-    errorCallback: function
-  ): Promise<string>|function(conversationId: string) {
-    var that = this;
-    var errMsg = null;
-
-    return new Promise(function(resolve, reject) {
+    successCallback?: (success: boolean) => void,
+    errorCallback?: (errorMessage: any) => void
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
       // errorCallback handling
       if (!recipients) {
-        errMsg = new Error('[WONDER removeRecipients] errorCallback: no reciepients given')
+        const errMsg = new Error('[WONDER removeRecipients] errorCallback: no reciepients given');
         reject(errMsg);
         if (errorCallback) { errorCallback(errMsg); }
         return;
       }
       // force an array construct
-      var rcpt = [];
-      if (typeof recipients === 'string') rcpt.push(recipients);
-      else rcpt = recipients;
+      let rcpt = [];
+      if (typeof recipients === 'string') {
+        rcpt.push(recipients);
+      } else {
+        rcpt = recipients;
+      }
 
       // TODO : implement
       // conversation.addParticipant(participant, invitationBody, constraints, function(){resolve()}, function(){reject()});
 
     });
   }
-  */
-
-  /**
-   * !!! not implemented yet
-   * TODO: implement
 
   addDemand(
-    type: Object,
+    type: string|string[]|{ [key: string]: any } | Demand,
     conversationId: string,
-    successCallback: function,
-    errorCallback: function
-  ): Promise<string>|function(conversationId: string) {
-    var that = this;
-    var errMsg = null;
-
-    return new Promise(function(resolve, reject) {
+    successCallback?: () => void,
+    errorCallback?: (errorMessage: any) => void,
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
       // errorCallback handling
       if (!type) {
-        errMsg = new Error('[WONDER addDemand] errorCallback: no type given');
+        const errMsg = new Error('[WONDER addDemand] errorCallback: no type given');
         reject(errMsg);
         if (errorCallback) { errorCallback(errMsg); }
         return;
       }
     });
   }
-    */
 
-  /**
-   * !!! not implemented yet
-   * TODO: implement
 
   removeDemand(
-    type: Object,
+    type: string|string[]|{ [key: string]: any } | Demand,
     conversationId: string,
-    successCallback: function,
-    errorCallback: function
-  ): Promise<string>|function(conversationId: string) {
-    var that = this;
-    var errMsg = null;
-
-    return new Promise(function(resolve, reject) {
+    successCallback?: () => void,
+    errorCallback?: (errorMessage: any) => void,
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
       // errorCallback handling
       if (!type) {
-        errMsg = new Error('[WONDER removeDemand] errorCallback: no type given');
+        const errMsg = new Error('[WONDER removeDemand] errorCallback: no type given');
         reject(errMsg);
         if (errorCallback) { errorCallback(errMsg); }
         return;
       }
     });
   }
-    */
 
-  logout(successCallback: Function, errorCallback: Function): Promise<Boolean> {
+
+  logout(successCallback?: (success: boolean) => void, errorCallback?: (errorMessage: string) => void): Promise<boolean> {
     const that = this;
     let errMsg = null;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       // errorCallback handling
       if (!that.myIdentity) {
         errMsg = new Error('[WONDER logout] not logged in');
@@ -378,11 +358,15 @@ export class Wonder {
     });
   }
 
-  hangup(conversationId?: string, successCallback?: Function, errorCallback?: Function): Promise<Boolean> {
+  hangup(
+    conversationId?: string,
+    successCallback?: (success: boolean) => void,
+    errorCallback?: (errorMessage: string) => void
+  ): Promise<boolean> {
     const that = this;
     let errMsg = null;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       // error handling
       if (that.conversations.length === 0) {
         errMsg = new Error('[WONDER hangup] no conversation present');
@@ -391,12 +375,10 @@ export class Wonder {
       }
 
       if (!conversationId) { // hangup all conversations
-        for (let i = 0; i < that.conversations.length; i++) {
-          that.conversations[i].leave();
-        }
+        that.conversations.forEach(c => c.leave());
         that.conversations = [];
       } else { // close a single conversation
-        let conversation = that.conversations.find(function(con) {
+        let conversation = that.conversations.find((con) => {
           return con.id === conversationId;
         });
         conversation.leave();
@@ -409,17 +391,17 @@ export class Wonder {
   }
 
   dataChannelMsg(
-    msg: Object,
+    msg: {},
     type: string,
     conversationId: string,
     to: Identity,
-    successCallback: Function,
-    errorCallback: Function
-  ): Promise<Boolean> {
+    successCallback?: (successCallback: boolean) => void,
+    errorCallback?: (errorMessage: string) => void
+  ): Promise<boolean> {
     const that = this;
     let errMsg = null;
     console.log('[WONDER dataChannelMsg] ', msg);
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       if (that.conversations.length === 0) {
         errMsg = new Error('[WONDER dataChannelMsg] no conversation present');
         reject(errMsg);
@@ -460,14 +442,14 @@ export class Wonder {
 
   answerRequest(
     msg: Message,
-    action: Boolean,
-    successCallback: Function,
-    errorCallback: Function
+    action: boolean,
+    successCallback: (conversationId: string) => void,
+    errorCallback: (errorMessage: string) => void
   ): Promise<string> {
     const that = this;
     let errMsg = null;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const conversation = that.conversations.find(con => {
           return con.id === msg.conversationId;
         }
