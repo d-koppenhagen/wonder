@@ -3,16 +3,17 @@ import { Conversation } from './Conversation';
 import { errorHandler } from './helpfunctions';
 import { RtcEvtType } from './Types';
 import { MessageFactory } from './MessageFactory';
+import { Message } from './Message';
 
 export class RtcEvtHandler {
-  msgbuf: any[] = [];
+  msgbuf: Message[] | any = [];
 
   constructor(
     public wonderInstance: Wonder,
     public conversation: Conversation
   ) { }
 
-  onEvt(evt: { type: string; candidate: any; channel?: any }) {
+  onEvt(evt: { type: string; candidate: RTCIceCandidate; channel?: any }) {
     const that = this;
 
     switch (evt.type) {
@@ -55,12 +56,6 @@ export class RtcEvtHandler {
         console.log('[RtcEvtHandler onEvt] conversation: ', this.conversation);
         console.log(evt);
 
-        const newcandidate = new RTCIceCandidate({ // @TODO remove this and test it
-          sdpMLineIndex: 0,
-          candidate: evt.candidate.candidate,
-          sdpMid: evt.candidate.sdpMid
-        });
-
         const msg = MessageFactory.updateIceCandidates(
           that.conversation.myParticipant.identity,
           that.conversation.remoteParticipants[0].identity,
@@ -100,14 +95,14 @@ export class RtcEvtHandler {
         } else {
           // @TODO remove static link to the participant, get it more dynamically to support multiparty conversations
           console.log('that.conversation.remoteParticipants[0].demand', that.conversation.remoteParticipants[0].demand);
-          console.log(that.conversation.remoteParticipants[0].demand['out'].data);
+          console.log(that.conversation.remoteParticipants[0].demand.out.data);
           const codec = that.conversation.dataChannelBroker.getDataChannelCodec(
             that.conversation.myParticipant.identity,
             that.conversation.remoteParticipants[0].identity,
             that.conversation.remoteParticipants[0].demand.out.data
           );
           evt.channel.onmessage = codec.onDataMessage.bind(codec);
-          evt.channel.payloadType = that.conversation.remoteParticipants[0].demand['out'].data;
+          evt.channel.payloadType = that.conversation.remoteParticipants[0].demand.out.data;
         }
         break;
 
