@@ -10,15 +10,17 @@ export enum MessageType {
   /** Message to add a new {@link Demand} */
   update = 'update',
   /** Message to process a new SDP offer or Answer
-  * @TODO use update instead of invitations when being in a conversation already
-  * use updatedSdp when sending the SDP answer and a conversation is already present */
+   * @TODO use update instead of invitations when being in a conversation already
+   * use updatedSdp when sending the SDP answer and a conversation is already present
+   */
   updateSdp = 'updateSdp',
   /** Answer when successfully added the new {@link Demand} */
   updated = 'updated',
   /** Message to publish the presence status of the identity */
   presence = 'presence',
   /** Message to be used when no predefined type suits the Message
-  * @TODO implement it  */
+   * @TODO implement it
+   */
   message = 'message',
   /** Message contains an ICE candidate */
   connectivityCandidate = 'connectivityCandidate'
@@ -31,17 +33,17 @@ export enum RtcEvtType {
   onaddlocalstream = 'onaddlocalstream',
   /** Event fired when the SDP of the peer connection changes and a new SDP negotiation needs to be done */
   onnegotiationneeded = 'onnegotiationneeded',
-  /** Event occuring each time a new ICE candidate is found and needs to be sent to the remote peer*/
+  /** Event occuring each time a new ICE candidate is found and needs to be sent to the remote peer */
   onicecandidate = 'icecandidate',
   /** Event rising when the peer connection signaling state changes */
   onsignalingstatechange = 'onsignalingstatechange',
   /** Event triggered when a stream is removed */
   onremovestream = 'onremovestream',
-  /** Event emerging when the state of the ICE gathering phanse changes **/
+  /** Event emerging when the state of the ICE gathering phanse changes */
   oniceconnectionstatechange = 'oniceconnectionstatechange',
   /** Event rising locally when a datachannel is added to the peer connection */
   ondatachannel = 'datachannel'
-};
+}
 
 export enum DataChannelEvtType {
   /** Event seen when a data channel is opened */
@@ -52,7 +54,7 @@ export enum DataChannelEvtType {
   onclose = 'onclose',
   /** Event rising when a message is received through a data channel */
   onmessage = 'message',
-};
+}
 
 export enum PayloadType {
   /** Plain data codec, sends and receives data without altering it */
@@ -67,4 +69,4 @@ export enum PayloadType {
   voice = 'voice',
   /** Video codec for non RTC video transportation */
   video = 'video'
-};
+}
