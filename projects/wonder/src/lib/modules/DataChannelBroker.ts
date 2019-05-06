@@ -18,7 +18,7 @@ export class DataChannelBroker {
     const that = this;
     let errMsg;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       // when no codecs were webfingered from bob or the payloadType doesn't match the codecs
       if (!to.codecs || !to.codecs[payloadType]) {
         // check if the codec doesn't matter
@@ -32,7 +32,7 @@ export class DataChannelBroker {
       } // else payload type found
 
       that.getCodec(to.codecs[payloadType]) // get the codec file
-        .then(function (codec) { // iterate through the object and resolve missing hierarchies
+        .then((codec: ICodec) => { // iterate through the object and resolve missing hierarchies
           if (!that.codecMap[from.rtcIdentity]) {
             that.codecMap[from.rtcIdentity] = {};
           }
@@ -46,7 +46,7 @@ export class DataChannelBroker {
           that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].dataChannelEvtHandler = dataChannelEvtHandler; // save the handler
           resolve(codec); // resolve the promise of addDataChannelCodec
         })
-        .catch(function (error) {
+        .catch((error) => {
           errMsg = new Error(`[DataChannelBroker addDataChannelCodec] error saving the codec in the codecMap: ${error}`);
           reject(errMsg);
           return errMsg;
@@ -54,7 +54,7 @@ export class DataChannelBroker {
     });
   }
 
-  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | Boolean | {[key: string]: any}): ICodec {
+  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | boolean | {[key: string]: any}): ICodec {
     if ((payloadType === 'true') || !payloadType) { payloadType = PayloadType.plain; } // fallback to codec plain
     if (this.codecMap[from.rtcIdentity] &&
       this.codecMap[from.rtcIdentity][to.rtcIdentity] &&
@@ -65,7 +65,7 @@ export class DataChannelBroker {
     }
   }
 
-  removeDataChannelCodec(from: Identity, to: Identity, payloadType: string): Boolean {
+  removeDataChannelCodec(from: Identity, to: Identity, payloadType: string): boolean {
     // check if the connection is there
     // check iteratively to avoid exceptions
     if (this.codecMap[from.rtcIdentity] &&
@@ -77,10 +77,10 @@ export class DataChannelBroker {
     return false; // if not found
   }
 
-  getCodec(codecUrl: string): Promise<Object> {
+  getCodec(codecUrl: string): Promise<{}> {
     const that = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       // error handling
       if (!codecUrl) {
         reject(Error('[DataChannelBroker getCodec] : no codecUrl specified'));
@@ -102,7 +102,7 @@ export class DataChannelBroker {
     });
   }
 
-  removeCodec(codecUrl: string): Boolean {
+  removeCodec(codecUrl: string): boolean {
     if (this.codecs[codecUrl]) {
       delete this.codecs[codecUrl];
       return true;

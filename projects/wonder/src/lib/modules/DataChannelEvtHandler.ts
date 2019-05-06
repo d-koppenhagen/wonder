@@ -11,7 +11,6 @@ export class DataChannelEvtHandler {
   ) { }
 
   onEvt(evt: { type }) { // getting the conversation from the constructor doesnt work as on
-    const that = this;
     console.log('[DataChannelEvtHandler] event:', evt);
 
     switch (evt.type) {
@@ -19,11 +18,9 @@ export class DataChannelEvtHandler {
         // console.log('this should be never ever called');
         console.log('[DataChannelEvtHandler onEvt] onopen', evt);
         // if the data channel is established the onmessage listener can be called
-        // if (that.dataChannel.readyState === 'open') that.dataChannel.onmessage = that.onEvt;
         if (this.dataChannel.readyState === 'open') {
-          this.dataChannel.onmessage = that.onEvt
-        };
-        // if (that.conversation.dc.readyState === 'open') that.conversation.dc.onmessage = that.onEvt;
+          this.dataChannel.onmessage = this.onEvt;
+        }
         break;
 
       case DataChannelEvtType.onclose:
@@ -36,7 +33,6 @@ export class DataChannelEvtHandler {
 
       case DataChannelEvtType.onmessage:
         console.log('[DataChannelEvtHandler onEvt] onmessage', evt);
-
         break;
 
       default:
