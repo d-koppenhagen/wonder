@@ -3,7 +3,7 @@ import { ICodec } from './interfaces';
 export class Codec implements ICodec {
   constructor(
     public dataChannel: RTCDataChannel,
-    public onMessage: Function
+    public onMessage: (data: string) => void
   ) { }
 
   send(input: string, dataChannel: RTCDataChannel) {
