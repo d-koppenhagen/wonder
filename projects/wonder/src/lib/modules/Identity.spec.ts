@@ -2,7 +2,7 @@ import { Identity } from './Identity';
 
 describe('IdentityClass', () => {
 
-  const stub: any = null;
+  const stub = null;
 
   it('should return a Identity', () => {
       const identity = new Identity(

@@ -10,7 +10,7 @@ export class Demand {
    * var demand = new Demand({in: 'video', out: 'audio'}); // demands incoming video and outgoing audio
    * var demand = new Demand({out:{data:true,video:false}}}); // demands only an outgoing data channel
    */
-  private _defaultDemand: IDemand = {
+  private defaultDemand: IDemand = {
     in: {
       audio: false,
       video: false,
@@ -23,45 +23,45 @@ export class Demand {
     }
   };
 
-  private _converted: IDemand = null;
+  private conv: IDemand = null;
 
-  constructor(data?: string | string[] | Object) {
-    this._converted = this._convertDemand(data);
+  constructor(data?: string | string[] | {}) {
+    this.conv = this.convertDemand(data);
   }
 
   get converted(): IDemand {
-    console.log(`[Demand] converted: ${this._converted}`);
-    return this._converted;
+    console.log(`[Demand] converted: ${this.conv}`);
+    return this.conv;
   }
 
-  private _convertDemand(data: string | string[] | Object): IDemand {
+  private convertDemand(data: string | string[] | {}): IDemand {
 
     // case data is a string
     if (typeof data === 'string') {
       if (data === '' || data === 'all') {
-        return this._demandAll();
+        return this.demandAll();
       } else {
-        return this._stringToDemand(data, this._defaultDemand);
+        return this.stringToDemand(data, this.defaultDemand);
       }
     } else if (data instanceof Array) { // case data is an array of strings
       if (data.length === 0) {
-        return this._demandAll();
+        return this.demandAll();
       } else {
-        return this._arrayToDemand(data, this._defaultDemand);
+        return this.arrayToDemand(data, this.defaultDemand);
       }
     } else if (data instanceof Object) { // case data is an Object
       if (data === null || data === undefined || Object.keys(data).length === 0) {
-        return this._demandAll();
+        return this.demandAll();
       } else {
-        return this._objectToDemand(data, this._defaultDemand);
+        return this.objectToDemand(data, this.defaultDemand);
       }
     } else {
-      return this._demandAll();
+      return this.demandAll();
     }
 
   }
 
-  private _stringToDemand(stringData: string, dem: IDemand): IDemand {
+  private stringToDemand(stringData: string, dem: IDemand): IDemand {
     if (dem.in.hasOwnProperty(stringData) && dem.out.hasOwnProperty(stringData)) {
       dem.in[stringData] = true;
       dem.out[stringData] = true;
@@ -69,17 +69,17 @@ export class Demand {
     return dem;
   }
 
-  private _arrayToDemand(arrayData: string[], dem: IDemand): IDemand {
-    for (let i = 0; i < arrayData.length; i++) {
-      if (dem.in.hasOwnProperty(arrayData[i]) && dem.out.hasOwnProperty(arrayData[i])) {
-        dem.in[arrayData[i]] = true;
-        dem.out[arrayData[i]] = true;
+  private arrayToDemand(arrayData: string[], dem: IDemand): IDemand {
+    arrayData.forEach(data => {
+      if (dem.in.hasOwnProperty(data) && dem.out.hasOwnProperty(data)) {
+        dem.in[data] = true;
+        dem.out[data] = true;
       }
-    }
+    });
     return dem;
   }
 
-  private _objectToDemand(objectData: Object, dem: IDemand): IDemand {
+  private objectToDemand(objectData: {}, dem: IDemand): IDemand {
     // if already has the sub-objects 'in' and 'out'
     if (objectData.hasOwnProperty('in') || objectData.hasOwnProperty('out')) {
       // iterate through 'in' and 'out'
@@ -105,18 +105,18 @@ export class Demand {
       }
       // if 'in' and 'out' is not specified, set attributes for both directions
     } else {
-      for (const prop in this._defaultDemand.in) {
+      for (const prop in this.defaultDemand.in) {
         if (objectData.hasOwnProperty(prop)) {
           if (objectData[prop] === true || objectData[prop] === false || objectData[prop] instanceof Object) {
-            this._defaultDemand.in[prop] = objectData[prop];
-            this._defaultDemand.out[prop] = objectData[prop];
+            this.defaultDemand.in[prop] = objectData[prop];
+            this.defaultDemand.out[prop] = objectData[prop];
           } else {
             if (typeof objectData[prop] === 'string' || objectData[prop] instanceof String) {// { data: 'plain' }
-              this._defaultDemand.in[prop] = objectData[prop]; // {in: {data : 'plain'}}
-              this._defaultDemand.out[prop] = objectData[prop]; // {in: {data : 'plain'}}
+              this.defaultDemand.in[prop] = objectData[prop]; // {in: {data : 'plain'}}
+              this.defaultDemand.out[prop] = objectData[prop]; // {in: {data : 'plain'}}
             } else {
-              this._defaultDemand.in[prop] = false;
-              this._defaultDemand.out[prop] = false;
+              this.defaultDemand.in[prop] = false;
+              this.defaultDemand.out[prop] = false;
             }
           }
         }
@@ -125,25 +125,25 @@ export class Demand {
     return dem;
   }
 
-  private _demandAll(): IDemand {
+  private demandAll(): IDemand {
     return {
       in: {
-        'audio': true,
-        'video': true,
-        'data': true
+        audio: true,
+        video: true,
+        data: true
       },
       out: {
-        'audio': true,
-        'video': true,
-        'data': true
+        audio: true,
+        video: true,
+        data: true
       }
     };
 
   }
 
   updateDemandAllow(targetDemand: IDemand, additionalDemand: IDemand): IDemand {
-    targetDemand = this._convertDemand(targetDemand);
-    additionalDemand = this._convertDemand(additionalDemand);
+    targetDemand = this.convertDemand(targetDemand);
+    additionalDemand = this.convertDemand(additionalDemand);
 
     // iterate through 'in' and 'out'
     for (const direction in targetDemand) {
@@ -161,8 +161,8 @@ export class Demand {
   }
 
   updateDemandDisallow(targetDemand: IDemand, restrictiveDemand: IDemand): IDemand {
-    targetDemand = this._convertDemand(targetDemand);
-    restrictiveDemand = this._convertDemand(restrictiveDemand);
+    targetDemand = this.convertDemand(targetDemand);
+    restrictiveDemand = this.convertDemand(restrictiveDemand);
 
     // iterate through 'in' and 'out'
     for (const direction in targetDemand) {
