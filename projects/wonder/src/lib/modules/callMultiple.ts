@@ -20,7 +20,7 @@ export class CallMultiple {
             conversation.owner = conversation.myParticipant; // set me to the owner as i started the conversation
             const participant = new Participant(wonderInstance, identity, demand);
             conversation.remoteParticipants.push(participant); // set the conversation's participants
-            resolve(conversation);
+            resolve(conversation.id);
           }).catch((error) => {
             reject(new Error(`[callMultiple] error: ${error}`));
           });
