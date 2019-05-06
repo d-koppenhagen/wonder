@@ -1,7 +1,7 @@
 import { IIdpConfig } from './idp-config.interface';
 
 export interface IBaseConfig {
-  autoAccept: Boolean;
+  autoAccept: boolean;
   idp: 'webfinger' | IIdpConfig;
-  ice: RTCIceServer[]
+  ice: RTCIceServer[];
 }

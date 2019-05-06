@@ -1,7 +1,6 @@
 import { Message } from '../Message';
 
 export interface IMessagingStub {
-  constructor(): IMessagingStub;
   sendMessage(message: Message | Error): void;
   connect(
     ownRtcIdentity: string,
