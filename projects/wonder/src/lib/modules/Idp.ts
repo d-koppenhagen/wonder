@@ -1,7 +1,7 @@
 import { IMessagingStub } from './interfaces';
 import { Identity } from './Identity';
-import { WebFinger } from 'webfinger.js';
 import { IJsonIdp } from './interfaces';
+import { IWebFinger } from './interfaces/webfinger.interface';
 
 export class Idp {
   remoteIdp: string;
@@ -12,28 +12,28 @@ export class Idp {
     this.remoteIdp = remoteIdp || 'webfinger';
   }
 
-  getIdentity(rtcIdentity: string, credentials?: Object): Promise<Identity> {
+  getIdentity(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
     const that = this;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       if (!rtcIdentity) {
         reject(new Error('[Idp getIdentity] no rtcIdentity parameter'));
       }
 
       // return the resolved identity if it exists
-      for (let i = 0; i < that.resolvedIdentities.length; i++) {
-        if (that.resolvedIdentities[i].rtcIdentity === rtcIdentity) {
+      that.resolvedIdentities.forEach((identity: Identity) => {
+        if (identity.rtcIdentity === rtcIdentity) {
           console.log('[Idp getIdentity] identity already exists in:', that.resolvedIdentities);
-          resolve(that.resolvedIdentities[i]);
+          resolve(identity);
           return; // needs to be here because resolve isn't leaving the function
         }
-      }
+      });
 
 
       // otherwise ask the remote idp
       that.askRemoteIdp(rtcIdentity, credentials)
         // both remote idp and msg download server answered correctly
-        .then(function(identity) {
+        .then((identity: Identity) => {
           if (identity) {
             resolve(identity);
           } else {
@@ -41,14 +41,14 @@ export class Idp {
           }
         })
         // an error was thrown, possibly due to the network
-        .catch(function(error) {
+        .catch((error) => {
           reject(error);
         });
 
     });
   }
 
-  askRemoteIdp(rtcIdentity: string, credentials: Object): Promise<Identity> {
+  askRemoteIdp(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
     const that = this;
     let localMsgStubUrl = null;
     let remoteMsgStubUrl = null;
@@ -56,7 +56,7 @@ export class Idp {
     let remoteMessagingServer = null;
     let codecs = {};
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       if (!rtcIdentity) {
         reject(new Error('[Idp askRemoteIdp] no rtcIdentity in parameter'));
       }
@@ -64,8 +64,9 @@ export class Idp {
 
       if (that.remoteIdp === 'webfinger') {
         import('webfinger.js')
-          .then((WebFinger: WebFinger) => {
-            askWebFinger();
+          .then((wf: IWebFinger) => {
+            askWebFinger(wf);
+            console.log('[Idp askRemoteIdp] webfinger', wf);
           }, error => {
             reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
           });
@@ -77,16 +78,16 @@ export class Idp {
       /**
        * askWebFinger will search for identities using the webfinger protocol
        */
-      function askWebFinger() {
+      function askWebFinger(wf: IWebFinger) {
         // using the webfinger class
-        const webfinger = new WebFinger({
+        const webfinger = wf.constructor({
           webfist_fallback: false, // defaults to false, fallback to webfist
           tls_only: false, // defaults to true
           uri_fallback: true, // defaults to false
           request_timeout: 10000, // defaults to 10000
         });
 
-        webfinger.lookup(rtcIdentity, function(err, data) {
+        webfinger.lookup(rtcIdentity, (err, data) => {
           if (err) {
             reject((new Error(`[Idp askRemoteIdp] error: ${err.message}`)));
           } else {
@@ -107,22 +108,22 @@ export class Idp {
                   codecs[codecKey] = val;
                 }
               }
-            };
+            }
             console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
 
             if ( remoteMsgStubUrl && remoteMessagingServer ) {
-                const localDomain = that.myIdentity.split('@')[1];
-                const requestedDomain = rtcIdentity.split('@')[1];
-                if ( localDomain !== requestedDomain ) {
-                    console.log(`[Idp askRemoteIdp] using remote MsgStub ${remoteMsgStubUrl} for identity: ${rtcIdentity}`);
-                    localMsgStubUrl = remoteMsgStubUrl;
-                    messagingServer = remoteMessagingServer;
-                }
+              const localDomain = that.myIdentity.split('@')[1];
+              const requestedDomain = rtcIdentity.split('@')[1];
+              if ( localDomain !== requestedDomain ) {
+                console.log(`[Idp askRemoteIdp] using remote MsgStub ${remoteMsgStubUrl} for identity: ${rtcIdentity}`);
+                localMsgStubUrl = remoteMsgStubUrl;
+                messagingServer = remoteMessagingServer;
+              }
             }
 
             that.getMsgStub(localMsgStubUrl)
               // successfully resolved the messaging stub
-              .then(function(msgStub) {
+              .then((msgStub: IMessagingStub) => {
                 const identity = new Identity(
                   rtcIdentity,
                   that.remoteIdp,
@@ -136,7 +137,7 @@ export class Idp {
                 resolve(identity); // return the identity
               })
               // failed to resolve the messaging stub
-              .catch(function(error) {
+              .catch((error) => {
                 reject(error);
               });
           }
@@ -164,13 +165,13 @@ export class Idp {
 
             that.getMsgStub(localMsgStubUrl)
               // successfully resolved the messaging stub
-              .then(function(msgStub) {
+              .then((msgStub: IMessagingStub) => {
                 const identity = new Identity(rtcIdentity, that.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
                 that.resolvedIdentities.push(identity); // store identity in the idp
                 resolve(identity); // return the identity
               })
               // failed to resolve the messaging stub
-              .catch(function(error) {
+              .catch((error) => {
                 reject(new Error(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`));
               });
           }, error => {
@@ -186,7 +187,7 @@ export class Idp {
   getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
           console.log('[Idp getMsgStub] received stub: ', msgStub);
           resolve(msgStub);
