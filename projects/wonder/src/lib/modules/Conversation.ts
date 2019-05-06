@@ -29,18 +29,17 @@ export class Conversation {
   }
 
   leave() {
-    const that = this;
-    that.myParticipant.peerConnection.close();
-    for (let i = 0; i < that.remoteParticipants.length; i++) {
+    this.myParticipant.peerConnection.close();
+    this.remoteParticipants.forEach((participant: Participant) => {
       // this will trigger the iceconnectionstatechange event on the remote end
       // remote end needs to check pc.iceConnectionState == disconnected
-      if (that.remoteParticipants[i].peerConnection) {
-        that.remoteParticipants[i].peerConnection.close()
+      if (participant.peerConnection) {
+        participant.peerConnection.close();
       }
       // as the message is delivered trough the pc event a separate message isn't mandatory here
-    }
-    if (that.msgStub) {
-      that.msgStub.disconnect(); // now disconnect from the remote messaging server
+    });
+    if (this.msgStub) {
+      this.msgStub.disconnect(); // now disconnect from the remote messaging server
     }
   }
 
