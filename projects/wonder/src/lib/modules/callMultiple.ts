@@ -5,7 +5,7 @@ import { Conversation } from './Conversation';
 
 export class CallMultiple {
   static call(wonderInstance: Wonder, recipients: string[], conversation: Conversation, demand: IDemand) {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
 
       console.log('[callMultiple] Multiparty call to', recipients, 'with', demand);
 
@@ -16,12 +16,12 @@ export class CallMultiple {
       // create remote identity and participant
       recipients.forEach(recipient => {
         wonderInstance.localIdp.getIdentity(recipient)
-          .then(function(identity) {
+          .then((identity) => {
             conversation.owner = conversation.myParticipant; // set me to the owner as i started the conversation
             const participant = new Participant(wonderInstance, identity, demand);
             conversation.remoteParticipants.push(participant); // set the conversation's participants
             resolve(conversation);
-          }).catch(function(error) {
+          }).catch((error) => {
             reject(new Error(`[callMultiple] error: ${error}`));
           });
       });

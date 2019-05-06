@@ -9,12 +9,12 @@ import { errorHandler } from './helpfunctions';
 
 export class CallSingle {
   static call(wonderInstance: Wonder, recipient: string, conversation: Conversation, demand: IDemand): Promise<string> {
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       console.log(conversation);
 
       // create remote identity and participant
       wonderInstance.localIdp.getIdentity(recipient)
-      .then(function(identity) {
+      .then((identity) => {
         const participant = new Participant(wonderInstance, identity, demand);
         conversation.remoteParticipants.push(participant); // set the conversation's participants
         conversation.msgSrv = identity.msgSrv; // use the recipient's messaging server
@@ -30,7 +30,7 @@ export class CallSingle {
             wonderInstance.myIdentity.rtcIdentity, // use my rtcIdentity to connect to the remote server
             participant.identity.credentials, // use the remote participants credentials for that
             participant.identity.msgSrv, // the destination messaging server
-            function() { // successfully connected
+            () => { // successfully connected
               console.log('[callSingle] connected to REMOTE PARTICIPANTs msgServer');
               resolve(conversation.id);
               return conversation.id;
@@ -41,62 +41,47 @@ export class CallSingle {
         // set the conversation's messaging event handler for every message coming throuh the messaing server
         conversation.msgStub.onMessage = conversation.msgEvtHandler.onMessage.bind(conversation.msgEvtHandler);
       })
-      .catch(function(error) {
+      .catch((error) => {
         reject(error);
       }) // Promise of getIdentity is over here
 
       // take the promise from getIdentity
-      .then(function(conversationId) {
+      .then((conversationId) => {
         // needs to be here when data audio and video are requested all together
-        new Demand(demand).updateDemandDisallow(demand, { in: { data: true }, out: { data: true } })
+        new Demand(demand).updateDemandDisallow(demand, { in: { data: true }, out: { data: true } });
 
-        navigator.mediaDevices.getUserMedia(demand.out) // local participant demands video or audio to send
-        .then(function(stream) {
-          const evt = {
-            type: RtcEvtType.onaddlocalstream,
-            candidate: null,
-            channel: stream
-          }
-          conversation.rtcEvtHandler.onEvt(evt);
-          stream.getTracks().forEach(function(track) { // add the stream to the peer connection to send it later on
-            conversation.myParticipant.peerConnection.addTrack(track, stream);
-          });
-          conversation.myParticipant.peerConnection.createOffer().then( // create the sdp offer now for both participants
-            (offer) => {
+        navigator.mediaDevices.getUserMedia(demand.out)
+          .then((stream: MediaStream) => {
+            const evt = {
+              type: RtcEvtType.onaddlocalstream,
+              candidate: null,
+              channel: stream
+            };
+            conversation.rtcEvtHandler.onEvt(evt);
+            stream.getTracks().forEach((track) => { // add the stream to the peer connection to send it later on
+              conversation.myParticipant.peerConnection.addTrack(track, stream);
+            });
+          })
+          .then(() => {
+            return conversation.myParticipant.peerConnection.createOffer().then((offer: RTCSessionDescriptionInit) => {
               console.log('[callSingle] offer from alice: ', offer.sdp);
-              conversation.myParticipant.peerConnection.setLocalDescription(offer).then( // now set the peer connection description
-                () => {
-                  console.log('[callSingle] local description success');
-                  const msg = MessageFactory.invitation( // create the message for the remote participant
-                    conversation.myParticipant.identity,
-                    conversation.remoteParticipants[0].identity,
-                    conversation.id,
-                    conversation.myParticipant.demand, // also send the demand so bob knows what to expect from alice
-                    offer // include the sdp offer for bob
-                  );
-                  conversation.msgStub.sendMessage(msg); // and send the mesage
-                }).catch((reason) => {
-                  errorHandler(reason);
-                });
-              })
-              .catch((reason) => {
-                errorHandler(reason);
-              });
-
-            /*{
-              offerToReceiveAudio: true,
-              offerToReceiveVideo: true
-            }*/
-          // create offer ends here
-          resolve(conversation.id);
-        })
-        .catch(function(error) {
-          reject(error);
-          return error;
-        }); // getUserMedia promise ends here
-
+              return conversation.myParticipant.peerConnection.setLocalDescription(offer);
+            });
+          })
+          .then(() => {
+            console.log('[callSingle] local description success');
+            const msg = MessageFactory.invitation( // create the message for the remote participant
+              conversation.myParticipant.identity,
+              conversation.remoteParticipants[0].identity,
+              conversation.id,
+              conversation.myParticipant.demand, // also send the demand so bob knows what to expect from alice
+              conversation.myParticipant.peerConnection.localDescription // include the sdp offer for bob
+            );
+            conversation.msgStub.sendMessage(msg); // and send the mesage
+          })
+          .catch(errorHandler);
         resolve(conversation.id); // return the conversationId if everything went right
-      })
+      });
     });
   }
 }
