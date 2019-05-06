@@ -54,7 +54,7 @@ export class Conversation {
 
   getRemoteParticipant(identity: Identity): Participant {
     const existingParticipant = this.remoteParticipants.find(remoteParticipant => {
-        return remoteParticipant.identity === identity;
+      return remoteParticipant.identity === identity;
     });
     if (existingParticipant) { return existingParticipant; }
     return null;

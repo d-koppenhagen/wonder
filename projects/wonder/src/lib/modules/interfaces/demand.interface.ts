@@ -9,10 +9,10 @@ export interface IDemandSingleDirection {
   data?: boolean | { [key: string]: any } | string;
 }
 
-export type AudioVideoDataAll = 'audio'| 'video'| 'data' | 'all' | '';
-export type AudioVideoDataType = 'audio'| 'video'| 'data';
+export type AudioVideoDataAll = 'audio' | 'video' | 'data' | 'all' | '';
+export type AudioVideoDataType = 'audio' | 'video' | 'data';
 
 export type RawDemand =
   AudioVideoDataAll |
   AudioVideoDataType[] |
-  {[key in AudioVideoDataType]: any};
+  { [key in AudioVideoDataType]: any };

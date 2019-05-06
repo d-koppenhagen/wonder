@@ -7,7 +7,7 @@ export class DataChannelBroker {
   codecMap = {};
   codecs = {};
 
-  constructor() {}
+  constructor() { }
 
   addDataChannelCodec(
     from: Identity,
@@ -54,7 +54,7 @@ export class DataChannelBroker {
     });
   }
 
-  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | boolean | {[key: string]: any}): ICodec {
+  getDataChannelCodec(from: Identity, to: Identity, payloadType: string | boolean | { [key: string]: any }): ICodec {
     if ((payloadType === 'true') || !payloadType) { payloadType = PayloadType.plain; } // fallback to codec plain
     if (this.codecMap[from.rtcIdentity] &&
       this.codecMap[from.rtcIdentity][to.rtcIdentity] &&

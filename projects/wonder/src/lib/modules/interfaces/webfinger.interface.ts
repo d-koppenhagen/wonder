@@ -1,5 +1,5 @@
 export interface IWebFinger {
-  new (
+  new(
     config: {
       webfist_fallback?: boolean;
       tls_only?: boolean

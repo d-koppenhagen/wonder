@@ -111,10 +111,10 @@ export class Idp {
             }
             console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
 
-            if ( remoteMsgStubUrl && remoteMessagingServer ) {
+            if (remoteMsgStubUrl && remoteMessagingServer) {
               const localDomain = that.myIdentity.split('@')[1];
               const requestedDomain = rtcIdentity.split('@')[1];
-              if ( localDomain !== requestedDomain ) {
+              if (localDomain !== requestedDomain) {
                 console.log(`[Idp askRemoteIdp] using remote MsgStub ${remoteMsgStubUrl} for identity: ${rtcIdentity}`);
                 localMsgStubUrl = remoteMsgStubUrl;
                 messagingServer = remoteMessagingServer;
@@ -150,33 +150,33 @@ export class Idp {
        */
       function askJsonpIdp() {
         import(that.remoteIdp + rtcIdentity).then((data: IJsonIdp) => {
-            console.log('[Idp askJsonpIdp] remote idp answered: ', data);
-            localMsgStubUrl = data.rows[0].messagingStubURL;
-            messagingServer = data.rows[0].messagingServer;
-            codecs = {};
+          console.log('[Idp askJsonpIdp] remote idp answered: ', data);
+          localMsgStubUrl = data.rows[0].messagingStubURL;
+          messagingServer = data.rows[0].messagingServer;
+          codecs = {};
 
-            for (const val in data.rows[0]) {
-              if (val.substr(0, 5) === 'codec') {
-                const codecKey = val.substr(6); // cut 'codec_'
-                codecs[codecKey] = data.rows[0][val];
-                console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
-              }
+          for (const val in data.rows[0]) {
+            if (val.substr(0, 5) === 'codec') {
+              const codecKey = val.substr(6); // cut 'codec_'
+              codecs[codecKey] = data.rows[0][val];
+              console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
             }
-
-            that.getMsgStub(localMsgStubUrl)
-              // successfully resolved the messaging stub
-              .then((msgStub: IMessagingStub) => {
-                const identity = new Identity(rtcIdentity, that.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
-                that.resolvedIdentities.push(identity); // store identity in the idp
-                resolve(identity); // return the identity
-              })
-              // failed to resolve the messaging stub
-              .catch((error) => {
-                reject(new Error(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`));
-              });
-          }, error => {
-            reject(new Error(`[Idp askJsonpIdp] the identity could not be resolved from remote idp: ${error}`));
           }
+
+          that.getMsgStub(localMsgStubUrl)
+            // successfully resolved the messaging stub
+            .then((msgStub: IMessagingStub) => {
+              const identity = new Identity(rtcIdentity, that.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
+              that.resolvedIdentities.push(identity); // store identity in the idp
+              resolve(identity); // return the identity
+            })
+            // failed to resolve the messaging stub
+            .catch((error) => {
+              reject(new Error(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`));
+            });
+        }, error => {
+          reject(new Error(`[Idp askJsonpIdp] the identity could not be resolved from remote idp: ${error}`));
+        }
         );
       }
 
@@ -189,14 +189,14 @@ export class Idp {
 
     return new Promise((resolve, reject) => {
       import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
-          console.log('[Idp getMsgStub] received stub: ', msgStub);
-          resolve(msgStub);
-        }, error => {
-          reject(Error(`
+        console.log('[Idp getMsgStub] received stub: ', msgStub);
+        resolve(msgStub);
+      }, error => {
+        reject(Error(`
             Idp getMsgStub] messaging stub could not be retrieved from URL;
             possibly a malformed URL or the server is unreachable: ${error}`
-          ));
-        }
+        ));
+      }
       );
     });
   }

@@ -136,8 +136,8 @@ export class Wonder {
   }
 
   call(
-    recipients: string[]|string,
-    rawDemand: string|string[]|{ [key: string]: any } | Demand,
+    recipients: string[] | string,
+    rawDemand: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
     successCallback?: (conversationId: string) => void,
     errorCallback?: (errorMessage: string) => void
@@ -243,7 +243,7 @@ export class Wonder {
               DataChannel.establish(that, recipients, conversation, demand.out.data)
                 .then((cId: string) => {
                   resolve(conversationId);
-                  if (successCallback) {successCallback(conversationId); }
+                  if (successCallback) { successCallback(conversationId); }
                 })
                 .catch((error: any) => {
                   errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
@@ -264,7 +264,7 @@ export class Wonder {
 
 
   removeRecipients(
-    recipients: string[]|string,
+    recipients: string[] | string,
     conversationId: string,
     successCallback?: (success: boolean) => void,
     errorCallback?: (errorMessage: any) => void
@@ -292,7 +292,7 @@ export class Wonder {
   }
 
   addDemand(
-    type: string|string[]|{ [key: string]: any } | Demand,
+    type: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
     successCallback?: () => void,
     errorCallback?: (errorMessage: any) => void,
@@ -310,7 +310,7 @@ export class Wonder {
 
 
   removeDemand(
-    type: string|string[]|{ [key: string]: any } | Demand,
+    type: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
     successCallback?: () => void,
     errorCallback?: (errorMessage: any) => void,
@@ -413,7 +413,7 @@ export class Wonder {
         const remoteIdentity = that.conversations[0].remoteParticipants[0].identity;
         try {
           that.conversations[0].dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-          .send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
+            .send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
           resolve(true);
           if (successCallback) { successCallback(true); }
         } catch (err) {
@@ -423,12 +423,12 @@ export class Wonder {
         }
       } else { // else find the conversation
         const conversation = that.conversations.find(con => {
-            return con.id === conversationId;
+          return con.id === conversationId;
         });
         if (conversation) { // and if it was found send the message
           const remoteIdentity = conversation.remoteParticipants[0].identity;
           conversation.dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-          .send(msg, conversation.dataChannelEvtHandler.dataChannel);
+            .send(msg, conversation.dataChannelEvtHandler.dataChannel);
           resolve(true);
           if (successCallback) { successCallback(true); }
         } else { // and if not throw an error
@@ -451,8 +451,8 @@ export class Wonder {
 
     return new Promise((resolve, reject) => {
       const conversation = that.conversations.find(con => {
-          return con.id === msg.conversationId;
-        }
+        return con.id === msg.conversationId;
+      }
       );
       if (conversation) { // and if it was found send the message
         conversation.msgEvtHandler.answerRequest(msg, action);

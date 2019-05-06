@@ -6,7 +6,7 @@ export class Message {
 
   constructor(
     public from: Identity,
-    public to: Identity|Identity[],
+    public to: Identity | Identity[],
     public type: string,
     public conversationId: string,
     public misc?: any // string | { RTCIceCandidateInit; demand?: IDemand; sessionDescription?: any }

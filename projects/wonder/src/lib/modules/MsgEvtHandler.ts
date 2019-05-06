@@ -29,30 +29,30 @@ export class MsgEvtHandler {
           if (that.conversation.id === msg.conversationId) { // and the conversatinId is matching then add new constaints/fulfill the demand
             console.log('[MsgEvtHandler onMessage] invitation is legit, updating conversation');
             that.wonderInstance.localIdp.getIdentity(msg.from.rtcIdentity)
-            .then((identity: Identity) => {
-              const remoteParticipant = that.conversation.getRemoteParticipant(identity);
+              .then((identity: Identity) => {
+                const remoteParticipant = that.conversation.getRemoteParticipant(identity);
 
-              console.log('remote demand: ', msg.misc.demand);
-              // choose the right method
-              // did the remote user request audio or video
-              if (msg.misc.demand.in.video || msg.misc.demand.out.video ||
+                console.log('remote demand: ', msg.misc.demand);
+                // choose the right method
+                // did the remote user request audio or video
+                if (msg.misc.demand.in.video || msg.misc.demand.out.video ||
                   msg.misc.demand.in.audio || msg.misc.demand.out.audio) {
-                // do i have such a connection already
-                console.log('remoteParticipant', remoteParticipant);
-                // if (!remoteParticipant.demand.in.video && !remoteParticipant.demand.out.video &&
-                //    !remoteParticipant.demand.in.audio && !remoteParticipant.demand.out.audio)
+                  // do i have such a connection already
+                  console.log('remoteParticipant', remoteParticipant);
+                  // if (!remoteParticipant.demand.in.video && !remoteParticipant.demand.out.video &&
+                  //    !remoteParticipant.demand.in.audio && !remoteParticipant.demand.out.audio)
 
-                // only establish the connection when video or audio hasnt been created
-                that.establishRtcConnection(that.wonderInstance, that.conversation, msg);
-              }
-              // create as many datachannels as the remote user wants
-              if (msg.misc.demand.in.data || msg.misc.demand.out.data) {
-                that.establishDataChannel(that.wonderInstance, that.conversation, msg);
-              }
-            })
-            .catch((error) => {
-              console.error(error);
-            });
+                  // only establish the connection when video or audio hasnt been created
+                  that.establishRtcConnection(that.wonderInstance, that.conversation, msg);
+                }
+                // create as many datachannels as the remote user wants
+                if (msg.misc.demand.in.data || msg.misc.demand.out.data) {
+                  that.establishDataChannel(that.wonderInstance, that.conversation, msg);
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+              });
           } else {
             console.error(
               `Message arrived at wrong MessageEventHandler or MessageEventHandler
@@ -75,32 +75,32 @@ export class MsgEvtHandler {
 
           // get the remote identity
           that.wonderInstance.localIdp.getIdentity(msg.from.rtcIdentity)
-          .then((identity: Identity) => {
-            // Add participant and set the RTCPeerConnection
-            conversation.addRemoteParticipant(new Participant(that.wonderInstance, identity, msg.misc.demand));
-            conversation.myParticipant.setRtcPeerConnection(
-              new RTCPeerConnection({
-                iceServers: that.wonderInstance.config.ice
-              })
-            );
+            .then((identity: Identity) => {
+              // Add participant and set the RTCPeerConnection
+              conversation.addRemoteParticipant(new Participant(that.wonderInstance, identity, msg.misc.demand));
+              conversation.myParticipant.setRtcPeerConnection(
+                new RTCPeerConnection({
+                  iceServers: that.wonderInstance.config.ice
+                })
+              );
 
-            if (that.wonderInstance.config.autoAccept) {
-              // choose the right method
-              // TODO: change this to be able to establish a audio/video and a data connection with one invitation
-              if (msg.misc.demand.in.data || msg.misc.demand.out.data) {
-                that.establishDataChannel(that.wonderInstance, conversation, msg);
-              } else {
-                that.establishRtcConnection(that.wonderInstance, conversation, msg);
+              if (that.wonderInstance.config.autoAccept) {
+                // choose the right method
+                // TODO: change this to be able to establish a audio/video and a data connection with one invitation
+                if (msg.misc.demand.in.data || msg.misc.demand.out.data) {
+                  that.establishDataChannel(that.wonderInstance, conversation, msg);
+                } else {
+                  that.establishRtcConnection(that.wonderInstance, conversation, msg);
+                }
               }
-            }
-          })
-          .then(() => {
-            that.wonderInstance.onMessage(msg); // user interface for message events
-            return;
-          })
-          .catch((error) => {
-            return error;
-          });
+            })
+            .then(() => {
+              that.wonderInstance.onMessage(msg); // user interface for message events
+              return;
+            })
+            .catch((error) => {
+              return error;
+            });
         }
         return; // needs to be here in order not to call onMessage twice
 
@@ -202,80 +202,80 @@ export class MsgEvtHandler {
           msg.misc.demand.in.data, // with the codec of the remote participant || or plain
           dataChannelEvtHandler // and the handler of the channel
         )
-        .then((codec) => {
-          // get the codec
-          codec = dataChannelBroker.getDataChannelCodec(
-            conversation.myParticipant.identity,
-            conversation.remoteParticipants[0].identity,
-            msg.misc.demand.in.data
-          );
+          .then((codec) => {
+            // get the codec
+            codec = dataChannelBroker.getDataChannelCodec(
+              conversation.myParticipant.identity,
+              conversation.remoteParticipants[0].identity,
+              msg.misc.demand.in.data
+            );
 
-          // overwrite the codec with the help of its constructor
-          // create the datachannel and assign it to the codec
-          codec.dataChannel = conversation.myParticipant.peerConnection.createDataChannel(guid());
-          // register the handler which will receive the message after the codec is finished decoding the message
-          codec.onMessage = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
-          // tell the codec from whom messages are coming to be sent over the channel
-          codec.from = conversation.myParticipant.identity;
-          // tell the codec who the receiver is, can be helpful i.e. for chat communication
-          codec.to = conversation.remoteParticipants[0].identity;
+            // overwrite the codec with the help of its constructor
+            // create the datachannel and assign it to the codec
+            codec.dataChannel = conversation.myParticipant.peerConnection.createDataChannel(guid());
+            // register the handler which will receive the message after the codec is finished decoding the message
+            codec.onMessage = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
+            // tell the codec from whom messages are coming to be sent over the channel
+            codec.from = conversation.myParticipant.identity;
+            // tell the codec who the receiver is, can be helpful i.e. for chat communication
+            codec.to = conversation.remoteParticipants[0].identity;
 
-          // also register the dataChannel in its handler for easier reference
-          dataChannelEvtHandler.dataChannel = codec.dataChannel;
+            // also register the dataChannel in its handler for easier reference
+            dataChannelEvtHandler.dataChannel = codec.dataChannel;
 
-          // override the functions which may be defined in the required codec to standard ones for correct functionality
-          // when the data channel is ready then assign the codec's onDataMessage function to the channel
-          codec.dataChannel.onopen = (evt) => {
-            if (codec.dataChannel.readyState === 'open') {
-              codec.dataChannel.onmessage = codec.onDataMessage.bind(codec);
-            }
-          };
+            // override the functions which may be defined in the required codec to standard ones for correct functionality
+            // when the data channel is ready then assign the codec's onDataMessage function to the channel
+            codec.dataChannel.onopen = (evt) => {
+              if (codec.dataChannel.readyState === 'open') {
+                codec.dataChannel.onmessage = codec.onDataMessage.bind(codec);
+              }
+            };
 
-          // register the data channel handler and bind its class as 'this' inside the function
-          codec.dataChannel.onclose = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
-          console.log('codec:', codec);
-          // attach the data channel to the conversation for testing
-          // conversation.dc = codec.dataChannel; // TODO: THIS NEEDS TO BE HANDELED LATER ON!!!!
+            // register the data channel handler and bind its class as 'this' inside the function
+            codec.dataChannel.onclose = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
+            console.log('codec:', codec);
+            // attach the data channel to the conversation for testing
+            // conversation.dc = codec.dataChannel; // TODO: THIS NEEDS TO BE HANDELED LATER ON!!!!
 
-          // TODO: THIS NEEDS TO BE DONE EVERY TIME A PEERCONNECTION IS CREATED
-          // ondatachannel is a rtcEvent and therefore needs to be handled there
-          conversation.myParticipant.peerConnection.ondatachannel = conversation.rtcEvtHandler.onEvt.bind(conversation.rtcEvtHandler);
+            // TODO: THIS NEEDS TO BE DONE EVERY TIME A PEERCONNECTION IS CREATED
+            // ondatachannel is a rtcEvent and therefore needs to be handled there
+            conversation.myParticipant.peerConnection.ondatachannel = conversation.rtcEvtHandler.onEvt.bind(conversation.rtcEvtHandler);
 
-          // if a new data channel will be created it is a peer connection event or rtc event respectively
-          conversation.myParticipant.peerConnection.ondatachannel = conversation.rtcEvtHandler.onEvt.bind(conversation.rtcEvtHandler);
+            // if a new data channel will be created it is a peer connection event or rtc event respectively
+            conversation.myParticipant.peerConnection.ondatachannel = conversation.rtcEvtHandler.onEvt.bind(conversation.rtcEvtHandler);
 
-          // reject ice handling as long as the sdp isnt set on both ends
-          that.ice = false;
+            // reject ice handling as long as the sdp isnt set on both ends
+            that.ice = false;
 
-          // set the description of alice
-          conversation.myParticipant.peerConnection.setRemoteDescription(new RTCSessionDescription(msg.misc.sessionDescription))
-            .then(() => {
-              console.log('[MsgEvtHandler establishDataChannel] set remote description success');
-              return navigator.mediaDevices.getUserMedia(msg.misc.demand.in);
-            })
-            .then((stream) => {
-              console.log(conversation.remoteParticipants);
-              console.log(conversation.myParticipant);
-            })
-            .then(() => {
-              return conversation.myParticipant.peerConnection.createAnswer();
-            })
-            .then((answer) => {
-              return conversation.myParticipant.peerConnection.setLocalDescription(answer);
-            })
-            .then(() => {
-              const m = MessageFactory.accepted(
-                conversation.myParticipant.identity,
-                conversation.remoteParticipants[0].identity,
-                conversation.id,
-                conversation.remoteParticipants[0].demand,
-                conversation.myParticipant.peerConnection.localDescription
-              );
-              conversation.msgStub.sendMessage(m);
-            })
-            .catch(errorHandler);
-        })
-        .catch(errorHandler);
+            // set the description of alice
+            conversation.myParticipant.peerConnection.setRemoteDescription(new RTCSessionDescription(msg.misc.sessionDescription))
+              .then(() => {
+                console.log('[MsgEvtHandler establishDataChannel] set remote description success');
+                return navigator.mediaDevices.getUserMedia(msg.misc.demand.in);
+              })
+              .then((stream) => {
+                console.log(conversation.remoteParticipants);
+                console.log(conversation.myParticipant);
+              })
+              .then(() => {
+                return conversation.myParticipant.peerConnection.createAnswer();
+              })
+              .then((answer) => {
+                return conversation.myParticipant.peerConnection.setLocalDescription(answer);
+              })
+              .then(() => {
+                const m = MessageFactory.accepted(
+                  conversation.myParticipant.identity,
+                  conversation.remoteParticipants[0].identity,
+                  conversation.id,
+                  conversation.remoteParticipants[0].demand,
+                  conversation.myParticipant.peerConnection.localDescription
+                );
+                conversation.msgStub.sendMessage(m);
+              })
+              .catch(errorHandler);
+          })
+          .catch(errorHandler);
       }, errorHandler);
   }
 

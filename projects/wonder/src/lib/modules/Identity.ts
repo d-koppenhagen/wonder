@@ -9,5 +9,5 @@ export class Identity {
     public msgSrv: string,
     public codecs?: { [key in PayloadType]?: string },
     public credentials?: any
-  ) {}
+  ) { }
 }

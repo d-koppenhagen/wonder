@@ -30,20 +30,20 @@ export class RtcEvtHandler {
         that.conversation.myParticipant.peerConnection.createOffer().then((offer) => {
           return that.conversation.myParticipant.peerConnection.setLocalDescription(offer)
             .then(() => {
-            const m = MessageFactory.updateSdp(
-              that.conversation.myParticipant.identity,
-              that.conversation.remoteParticipants[0].identity,
-              that.conversation.id,
-              offer
-            );
-            that.conversation.msgStub.sendMessage(m);
-          }).catch((reason) => {
+              const m = MessageFactory.updateSdp(
+                that.conversation.myParticipant.identity,
+                that.conversation.remoteParticipants[0].identity,
+                that.conversation.id,
+                offer
+              );
+              that.conversation.msgStub.sendMessage(m);
+            }).catch((reason) => {
+              errorHandler(reason);
+            });
+        })
+          .catch((reason) => {
             errorHandler(reason);
           });
-        })
-        .catch((reason) => {
-          errorHandler(reason);
-        });
         break;
 
       case RtcEvtType.onicecandidate:

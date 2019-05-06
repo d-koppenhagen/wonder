@@ -130,10 +130,10 @@ export class DataChannel {
               .catch(errorHandler);
             resolve(conversation.id); // return the conversationId if everything went right
           },
-          // DataChannelBroker download failed
-          (error) => {
-            reject(Error(`[dataChannel] dataChannelBroker requiring failed: ${error}`));
-          });
+            // DataChannelBroker download failed
+            (error) => {
+              reject(Error(`[dataChannel] dataChannelBroker requiring failed: ${error}`));
+            });
         }) // addDataChannelCodec promise ends here
         .catch((error) => {
           console.error(error);
