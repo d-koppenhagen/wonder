@@ -1,10 +1,9 @@
 import { Identity } from './Identity';
 
-describe('IdentityClass', () => {
-
+describe('Identity', () => {
   const stub = null;
 
-  it('should return a Identity', () => {
+  it('should return an identity', () => {
     const identity = new Identity(
       'alice@mydomain.com',
       'webfinger',

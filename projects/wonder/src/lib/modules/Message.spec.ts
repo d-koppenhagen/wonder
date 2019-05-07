@@ -2,7 +2,7 @@ import { Message } from './Message';
 import { Identity } from './Identity';
 import { MessageType } from './Types';
 
-describe('MessageClass', () => {
+describe('Message', () => {
   const identityA = new Identity(
     'alice@mydomain.com',
     'webfinger',
@@ -27,7 +27,7 @@ describe('MessageClass', () => {
     'http://mymsgsrv.com'
   );
 
-  it('should return a Identity', () => {
+  it('should return a accepted message', () => {
     const msg = new Message(
       identityA,
       identityB,
@@ -40,7 +40,7 @@ describe('MessageClass', () => {
     expect(msg.id.length).toEqual(36);
   });
 
-  it('should return a Identity with multiple targets', () => {
+  it('should return a invitation message mith multiple target identities', () => {
     const msg = new Message(
       identityA,
       [identityB, identityC],
