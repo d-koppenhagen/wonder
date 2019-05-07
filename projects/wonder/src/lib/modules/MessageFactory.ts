@@ -20,14 +20,7 @@ export class MessageFactory {
     conversationId: string,
     demand: IDemand,
     sessionDescription: {}
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.invitation] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) { return new Error('[MessageFactory.invitation] to should be an instance of Identity or an Array with Identities'); }
-
+  ): Message {
     const misc = {
       demand,
       sessionDescription
@@ -45,16 +38,7 @@ export class MessageFactory {
     conversationId: string,
     demand: {},
     sessionDescription: {}
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.accepted] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.accepted] to should be an instance of Identity or an Array with Identities');
-    }
-
+  ): Message {
     const misc = {
       demand,
       sessionDescription
@@ -70,17 +54,7 @@ export class MessageFactory {
     from: Identity,
     to: Identity | Identity[],
     conversationId: string
-  ): Message | Error {
-    console.log(from, to, conversationId);
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.declined] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.declined] to should be an instance of Identity or an Array with Identities');
-    }
-
+  ): Message {
     return new Message(from, to, MessageType.declined, conversationId);
   }
 
@@ -92,16 +66,7 @@ export class MessageFactory {
     from: Identity,
     to: Identity | Identity[],
     conversationId: string
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.bye] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.bye] to should be an instance of Identity or an Array with Identities');
-    }
-
+  ): Message {
     return new Message(from, to, MessageType.bye, conversationId);
   }
 
@@ -114,15 +79,7 @@ export class MessageFactory {
     to: Identity | Identity[],
     conversationId: string,
     demand: {}
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.updateDemand] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.updateDemand] to should be an instance of Identity or an Array with Identities');
-    }
+  ): Message {
     const misc = {
       demand,
     };
@@ -138,16 +95,7 @@ export class MessageFactory {
     to: Identity | Identity[],
     conversationId: string,
     iceCandidates: {}
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.updateIceCandidates] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.updateIceCandidates] to should be an instance of Identity or an Array with Identities');
-    }
-
+  ): Message {
     return new Message(from, to, MessageType.connectivityCandidate, conversationId, iceCandidates);
   }
 
@@ -160,15 +108,7 @@ export class MessageFactory {
     to: Identity | Identity[],
     conversationId: string,
     sdp: {}
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.updateDemand] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.updateDemand] to should be an instance of Identity or an Array with Identities');
-    }
+  ): Message {
     const misc = {
       sdp,
     };
@@ -185,15 +125,7 @@ export class MessageFactory {
     to: Identity | Identity[],
     conversationId: string,
     status: string
-  ): Message | Error {
-    if (!(from instanceof Identity)) {
-      return new Error('[MessageFactory.presence] from should be an instance of Identity');
-    }
-    if (!(to instanceof Identity || to instanceof Array && !to.find((i) => {
-      return !(i instanceof Identity);
-    }))) {
-      return new Error('[MessageFactory.presence] to should be an instance of Identity or an Array with Identities');
-    }
+  ): Message {
     const misc = {
       status,
     };
