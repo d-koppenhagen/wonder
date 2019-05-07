@@ -11,7 +11,7 @@ export class Idp {
   /**
    * @desc containing already known identities.
    */
-  resolvedIdentities: Identity[] = [];
+  private resolvedIdentities: Identity[] = [];
 
   /**
    * @desc contains the url to the messaging server, which is received from the remote Idp.
@@ -100,13 +100,18 @@ export class Idp {
       console.log('[Idp askRemoteIdp] asking remote Idp...');
 
       if (this.remoteIdp === 'webfinger') {
-        import('webfinger.js')
-          .then((wf: IWebFinger) => {
-            this.askWebFinger(wf, rtcIdentity, credentials);
-            console.log('[Idp askRemoteIdp] webfinger', wf);
-          }, error => {
-            reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
-          });
+        try {
+          const webfinger: typeof import('../../../../../node_modules/webfinger.js/src/webfinger.js') =
+          require('../../../../../node_modules/webfinger.js/src/webfinger.js');
+          console.log('[Idp askRemoteIdp] webfinger', webfinger);
+          return this.askWebFinger(webfinger, rtcIdentity, credentials)
+            .then((identity: Identity) => {
+              console.log('[Idp askRemoteIdp] webfinger resolved identity', identity);
+              resolve(identity);
+            });
+        } catch (error) {
+          reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
+        }
       } else {
         this.askJsonpIdp(rtcIdentity, credentials);
       }
@@ -125,7 +130,8 @@ export class Idp {
 
     return new Promise((resolve, reject) => {
       // using the webfinger class
-      const webfinger = wf.constructor({
+
+      const webfinger = new wf({
         webfist_fallback: false, // defaults to false, fallback to webfist
         tls_only: false, // defaults to true
         uri_fallback: true, // defaults to false
@@ -136,7 +142,7 @@ export class Idp {
         if (err) {
           reject((new Error(`[Idp askRemoteIdp] error: ${err.message}`)));
         } else {
-          console.log('[Idp askRemoteIdp] found Webfinger entry for ' + rtcIdentity + ': ', data);
+          console.log('[Idp askRemoteIdp] found Webfinger entry for', rtcIdentity, 'data:', data);
 
           /**
            * get the MessagingStub URL's
