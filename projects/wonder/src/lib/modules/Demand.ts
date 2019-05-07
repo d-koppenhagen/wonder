@@ -1,5 +1,36 @@
 import { IDemand } from './interfaces';
 
+/**
+ * @desc This class converts different data demand types to a pre-defined format.
+ * The Format contains an 'in' and 'out' object which is used to differentiate local and remote media access.
+ * The output could look like this:
+ * @example
+ * {
+ *  in: {
+ *    video: {
+ *      mandatory: { minAspectRatio: 1.333, maxAspectRatio: 1.334 },
+ *      optional : [
+ *        { minFrameRate: 60 },
+ *        { maxWidth: 640 },
+ *        { maxHeigth: 480 }
+ *      ]
+ *    }
+ *    audio: true,
+ *    data: true
+ *  },
+ *  out: {
+ *    video: {
+ *      mandatory: { minAspectRatio: 1.4},
+ *      optional : [
+ *        { minFrameRate: 20 },
+ *        { maxWidth: 800 }
+ *      ]
+ *    }
+ *    audio: false,
+ *    data: 'chat'
+ *  }
+ * }
+ */
 export class Demand {
   /**
    * @example
@@ -34,6 +65,9 @@ export class Demand {
     return this.conv;
   }
 
+  /**
+   * @desc The function converts different demand requests to a unified format.
+   */
   private convertDemand(data: string | string[] | {}): IDemand {
 
     // case data is a string
@@ -61,6 +95,9 @@ export class Demand {
 
   }
 
+  /**
+   * @desc Convertes a string to a standardized format
+   */
   private stringToDemand(stringData: string, dem: IDemand): IDemand {
     if (dem.in.hasOwnProperty(stringData) && dem.out.hasOwnProperty(stringData)) {
       dem.in[stringData] = true;
@@ -69,6 +106,9 @@ export class Demand {
     return dem;
   }
 
+  /**
+   * @desc Convertes an array to a standardized format
+   */
   private arrayToDemand(arrayData: string[], dem: IDemand): IDemand {
     arrayData.forEach(data => {
       if (dem.in.hasOwnProperty(data) && dem.out.hasOwnProperty(data)) {
@@ -79,6 +119,9 @@ export class Demand {
     return dem;
   }
 
+  /**
+   * @desc Convertes an object to a standardized format
+   */
   private objectToDemand(objectData: {}, dem: IDemand): IDemand {
     // if already has the sub-objects 'in' and 'out'
     if (objectData.hasOwnProperty('in') || objectData.hasOwnProperty('out')) {
@@ -125,6 +168,9 @@ export class Demand {
     return dem;
   }
 
+  /**
+   * @desc This defines the format for the output as an object and demands everything by default
+   */
   private demandAll(): IDemand {
     return {
       in: {
@@ -138,9 +184,12 @@ export class Demand {
         data: true
       }
     };
-
   }
 
+  /**
+   * @desc The function assigns all properties which are wanted in the additional demand to the target demand.
+   * @example Demand.updateDemandAllow(demandToModify, demandToAdd);
+   */
   updateDemandAllow(targetDemand: IDemand, additionalDemand: IDemand): IDemand {
     targetDemand = this.convertDemand(targetDemand);
     additionalDemand = this.convertDemand(additionalDemand);
@@ -160,6 +209,12 @@ export class Demand {
     return targetDemand;
   }
 
+  /**
+   * @desc The function sets all properties which are not wanted in the restrictive demand to false in the target demand.
+   * @example
+   * Demand.updateDemandDisallow(demandToModify, demandToRemove);
+   * Demand.updateDemandDisallow(demandToModify, {data:true}) // sets data to false in demandToModify
+   */
   updateDemandDisallow(targetDemand: IDemand, restrictiveDemand: IDemand): IDemand {
     targetDemand = this.convertDemand(targetDemand);
     restrictiveDemand = this.convertDemand(restrictiveDemand);

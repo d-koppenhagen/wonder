@@ -8,14 +8,83 @@ import { MsgEvtHandler } from './modules/MsgEvtHandler';
 import { IBaseConfig } from './modules/interfaces';
 import { IDemand } from './modules/interfaces/demand.interface';
 
+/**
+ * @desc WebRTC framework to facilitate the development of Applications which seamlessly interoperate with each other
+ * This framework is based on @see https://github.com/hypercomm/wonder
+ * @author Danny Koppenhagen <mail@d-koppenhagen.de>
+ * @author Johannes Hamfler <jh@z7k.de>
+ * @desc The WONDER class is used for developers for interacting with all other WONDER related classes.
+ * The class uses simple interfaces for login, call, etc.
+ * All operations will start with wonder.<function-name> and will return a promise and a callback (either successCallback or errorCallback).
+ * @example wonder.<funcion>(<params>).then(function(successCallbackData){<code>}, function(errorCallbackData){<code>})
+ */
 export class Wonder {
+  /**
+   * @desc An object with a configuration
+   * The standard values are set by default when the user doesn't want to do
+   * it on his own.
+   * @example
+   * {
+   *  idp: 'webfinger',
+   *  // alternatively an own idp with:
+   *  // idp:{ url:  'http://example.com',
+   *  //       port: '2222',
+   *  //       path: '/u?jsonp=define&identity'   }
+   *  autoAccept: false, // accept invitations automatically
+   *  ice: [
+   *     {urls:'stun:stun.example.com'}, // stunserver
+   *     { // turnserver
+   *       urls: 'turn:turn.example.org:11111?transport=tcp',
+   *       credential: 'credeantialAccessString',
+   *       username: 'usernameToAccess'
+   *     }
+   *   ]
+   * }
+   */
   config: IBaseConfig;
+
+  /**
+   * @desc The conversations used in this WONDER instance
+   */
   conversations: Conversation[] = [];
+
+  /**
+   * @desc The identity of the local user
+   */
   myIdentity: Identity = null;
+
+  /**
+   * @desc The local identity provider residing in the local WONDER instance
+   * used to interact with the remote identity provider. It is there to be
+   * able to abstact the remote identity provider and define a common
+   * interface to WONDER functions.
+   * It resolves identities via WebFinger or JSONP.
+   */
   localIdp: Idp = null;
+
+  /**
+   * @desc The variable on which the framework user can register his own message event handler.
+   * It is called after the WONDER framework is finished processing each message.
+   * Is meant to deliver events which originate from the messaging server.
+   * @example wonder.onMessage = function(msg, conversationId) { ... }
+   */
   onMessage = new Function();
+
+  /**
+   * @desc The variable on which the framework user can register an event handler for wonder rtc (peer connection) events.
+   * It is called after the WONDER framework is finished processing each
+   * Is meant to deliver events which originate from the peer connection to another user.
+   * @example wonder.onRtcEvt = function(msg, conversationId) { ... }
+   */
   onRtcEvt = new Function();
-  onDataChannelEvt = new Function();
+
+  /**
+   * @desc The variable on which the framework user can register an event handler for wonder data channel events.
+   * It is called after the WONDER framework is finished processing each
+   * Is meant to deliver events which originate from the peer connection's datachannels to another user.
+   * @example wonder.onDataChannelEvt = function(msg, conversationId){ ... }
+   */
+   onDataChannelEvt = new Function();
 
   constructor() {
     this.config = {
@@ -68,6 +137,14 @@ export class Wonder {
     };
   }
 
+  /**
+   * @desc The function starts a user login at the identity provider.
+   * @example
+   * wonder.login('alice@example.net', '')
+   * .then(function(identity){
+   *   // use the identity to extract the user's aliases, avatar or other information
+   * });
+   */
   login(
     myRtcIdentity: string,
     credentials: { [key: string]: any } | string,
@@ -135,6 +212,14 @@ export class Wonder {
     });
   }
 
+   /**
+    * @desc A function to start a new call.
+    * @example
+    * wonder.call('bob@example.com', {video: true, data: PayloadType.chat})
+    * .then(function(conversationId){
+    *   // show video and send chat messages
+    * });
+    */
   call(
     recipients: string[] | string,
     rawDemand: string | string[] | { [key: string]: any } | Demand,
@@ -262,7 +347,10 @@ export class Wonder {
     });
   }
 
-
+  /**
+   * @desc A function to remove a reciepient from an existing conversation
+   * only used for multiparty calls
+   */
   removeRecipients(
     recipients: string[] | string,
     conversationId: string,
@@ -291,6 +379,9 @@ export class Wonder {
     });
   }
 
+  /**
+   * @desc Add demand to an existing conversation
+   */
   addDemand(
     type: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
@@ -308,7 +399,9 @@ export class Wonder {
     });
   }
 
-
+  /**
+   * @desc Remove demand from an existing conversation
+   */
   removeDemand(
     type: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
@@ -326,7 +419,10 @@ export class Wonder {
     });
   }
 
-
+  /**
+   * @desc A function to logout a user from his and all other messaging servers.
+   * The hangup function will be called to close all conversations.
+   */
   logout(successCallback?: (success: boolean) => void, errorCallback?: (errorMessage: string) => void): Promise<boolean> {
     const that = this;
     let errMsg = null;
@@ -358,6 +454,10 @@ export class Wonder {
     });
   }
 
+  /**
+   * @desc A function to hangup a single conversation or all conversations.
+   * @example wonder.hangup(conversationId).then( function(){ ... } );
+   */
   hangup(
     conversationId?: string,
     successCallback?: (success: boolean) => void,
@@ -390,6 +490,15 @@ export class Wonder {
     });
   }
 
+   /**
+    * @desc Sends a new data channel message via the RTCDataChannel.
+    * @example
+    * msg = 'Text or Message or Object or anything. Is handeled by the codec.';
+    * wonder.dataChannelMsg(msg, PayloadType.plain, conversationId)
+    * .then(function(booleanValue){
+    *   // success
+    * });
+    */
   dataChannelMsg(
     msg: {},
     type: string,
@@ -440,6 +549,29 @@ export class Wonder {
     });
   }
 
+  /**
+   * @desc This function needs to be called if the autoAccept option in the WONDER instacne is false.
+   * It needs to be used after the invitation is received and an answer is necessary.
+   * @example
+   *   wonder.onMessage = function(msg, conversationId){
+   *     switch (msg.type) {
+   *       case MessageType.invitation:
+   *         if(!wonder.config.autoAccept) {
+   *           var confirmDialog = confirm('Call from '+msg.from+'. Would you like to accept?');
+   *           if (confirmDialog == true) {
+   *               wonder.answerRequest(msg, true).then(function(){
+   *                 console.log('[main] Message invitation: user accepted invtitation');
+   *               });
+   *           } else {
+   *               wonder.answerRequest(msg, false).then(function(){
+   *                 console.log('[main] Message invitation: user declined invtitation');
+   *               });
+   *           }
+   *       }
+   *       break;
+   *     }
+   *   }
+   */
   answerRequest(
     msg: Message,
     action: boolean,

@@ -5,14 +5,32 @@ import { RtcEvtType } from './Types';
 import { MessageFactory } from './MessageFactory';
 import { Message } from './Message';
 
+/**
+ * @desc This class is an event handler vor events coming from a peer connection
+ */
 export class RtcEvtHandler {
+  /**
+   * @desc An array for buffering ICE candidate messages before they are sent
+   */
   msgbuf: Message[] | any = [];
 
   constructor(
+    /**
+     * @desc Backreference to the wonder instance
+     */
     public wonderInstance: Wonder,
+
+    /**
+     * @desc An reference to the corresponding conversation
+     */
     public conversation: Conversation
   ) { }
 
+  /**
+   * @desc This event handler processes events coming from a peer connection.
+   * @example
+   * participant.peerConnection.ondatachannel = conversation.rtcEvtHandler.onEvt.bind(conversation.rtcEvtHandler);
+   */
   onEvt(evt: { type: string; candidate: RTCIceCandidate; channel?: any }) {
     const that = this;
 

@@ -12,13 +12,28 @@ import { MessageType } from './Types';
 import { Identity } from './Identity';
 
 export class MsgEvtHandler {
+  /**
+   * @desc Flag to be able to tell if ice handling is allowed and the session description exchange of the peer connections is over
+   */
   ice = false;
 
   constructor(
+    /**
+     * @desc Backreference to the wonder instance the message event handler is related to
+     */
     public wonderInstance: Wonder,
+
+    /**
+     * @desc An reference to the conversation the event handler is handling incoming messages for
+     */
     public conversation?: Conversation
   ) { }
 
+  /**
+   * @desc This is a function to handle all incoming messages from the messaging server.
+   * @example
+   * msgStubInstance.onMessage = conversation.msgEvtHandler.onMessage().bind(conversation.msgEvtHandler);
+   */
   onMessage(msg: Message) {
     const that = this;
     switch (msg.type) {
@@ -181,6 +196,10 @@ export class MsgEvtHandler {
     }
   }
 
+  /**
+   * @desc This functions establishes a data channel for the invitation receiving side.
+   * It is only called from the message event handler itself and shouldn't be used outside of it.
+   */
   establishDataChannel(wonderInstance: Wonder, conversation: Conversation, msg: Message) {
     const that = this;
     console.log('conversation:', conversation);
@@ -279,6 +298,9 @@ export class MsgEvtHandler {
       }, errorHandler);
   }
 
+  /**
+   * @desc This functions establishes a video or audio connection to the remote peer
+   */
   establishRtcConnection(wonderInstance: Wonder, conversation: Conversation, msg: Message) {
     // conversation.remoteParticipants[0].demand.out needs to be updated too
 
@@ -313,6 +335,11 @@ export class MsgEvtHandler {
       .catch(errorHandler);
   }
 
+  /**
+   * @desc This function is needed to interrupt the processing of an invitation
+   * and establishes the desired data channel, audio or video connection
+   * after the user has granted his permission to do so.
+   */
   answerRequest(msg: Message, permission: boolean) {
     const that = this;
     console.log('[MsgEvtHandler answerRequest] permission granted: ', permission);
