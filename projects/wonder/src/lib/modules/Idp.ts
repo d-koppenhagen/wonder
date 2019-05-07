@@ -233,7 +233,7 @@ export class Idp {
   /**
    * @desc Resolve a messaging stub by asking a stub providing server
    */
-  getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
+  private getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
     return new Promise((resolve, reject) => {
