@@ -304,39 +304,35 @@ export class Wonder {
       } else if (typeof recipients === 'string') { // require file for a single call
         // start a video / audio call
         if (demand.out.video || demand.out.audio) {
-          import('./modules/callSingle')
-            .then((CallSingle: any) => {
-              CallSingle.call(that, recipients, conversation, demand)
-                .then((cId: string) => {
-                  resolve(cId);
-                  if (successCallback) { successCallback(cId); }
-                })
-                .catch((error: any) => {
-                  errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
-                  reject(errMsg);
-                  if (errorCallback) { errorCallback(errMsg); }
-                  return;
-                });
+          const callSingle: typeof import('./modules/callSingle') = require('./modules/callSingle');
+          callSingle.CallSingle.call(that, recipients, conversation, demand)
+            .then((cId: string) => {
+              resolve(cId);
+              if (successCallback) { successCallback(cId); }
+            })
+            .catch((error: any) => {
+              errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
+              reject(errMsg);
+              if (errorCallback) { errorCallback(errMsg); }
+              return;
             });
-
         }
         // start a data channel
         if (demand.out.data) {
-          import('./modules/DataChannel')
-            .then((DataChannel: any) => {
-              // also hand over the data object to tell what payload type is wanted
-              DataChannel.establish(that, recipients, conversation, demand.out.data)
-                .then((cId: string) => {
-                  resolve(conversationId);
-                  if (successCallback) { successCallback(conversationId); }
-                })
-                .catch((error: any) => {
-                  errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
-                  reject(errMsg);
-                  if (errorCallback) { errorCallback(errMsg); }
-                  return;
-                });
-            });
+          const dataChannel: typeof import('./modules/DataChannel') = require('./modules/DataChannel');
+          // also hand over the data object to tell what payload type is wanted
+          dataChannel.DataChannel.establish(that, recipients, conversation, demand.out.data)
+          .then((cId: string) => {
+            resolve(conversationId);
+            if (successCallback) { successCallback(conversationId); }
+          })
+          .catch((error: any) => {
+            errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
+            reject(errMsg);
+            if (errorCallback) { errorCallback(errMsg); }
+            return;
+          });
+
         }
       } else {
         errMsg = new Error('[WONDER call] cannot determine wether it is a multi or single party call');
