@@ -206,33 +206,32 @@ export class Idp {
     const codecs = {};
 
     return new Promise((resolve, reject) => {
-      import(this.remoteIdp + rtcIdentity).then((data: IJsonIdp) => {
-        console.log('[Idp askJsonpIdp] remote idp answered: ', data);
-        localMsgStubUrl = data.rows[0].messagingStubURL;
-        messagingServer = data.rows[0].messagingServer;
+      const stubUrl = `${this.remoteIdp}${rtcIdentity}`;
+      const data: IJsonIdp = require(stubUrl);
 
-        for (const val in data.rows[0]) {
-          if (val.substr(0, 5) === 'codec') {
-            const codecKey = val.substr(6); // cut 'codec_'
-            codecs[codecKey] = data.rows[0][val];
-            console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
-          }
+      console.log('[Idp askJsonpIdp] remote idp answered: ', data);
+      localMsgStubUrl = data.rows[0].messagingStubURL;
+      messagingServer = data.rows[0].messagingServer;
+
+      for (const val in data.rows[0]) {
+        if (val.substr(0, 5) === 'codec') {
+          const codecKey = val.substr(6); // cut 'codec_'
+          codecs[codecKey] = data.rows[0][val];
+          console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
         }
+      }
 
-        this.getMsgStub(localMsgStubUrl)
-          // successfully resolved the messaging stub
-          .then((msgStub: IMessagingStub) => {
-            const identity = new Identity(rtcIdentity, this.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
-            this.resolvedIdentities.push(identity); // store identity in the idp
-            resolve(identity); // return the identity
-          })
-          // failed to resolve the messaging stub
-          .catch((error) => {
-            reject(new Error(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`));
-          });
-      }, error => {
-        reject(new Error(`[Idp askJsonpIdp] the identity could not be resolved from remote idp: ${error}`));
-      });
+      this.getMsgStub(localMsgStubUrl)
+        // successfully resolved the messaging stub
+        .then((msgStub: IMessagingStub) => {
+          const identity = new Identity(rtcIdentity, this.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
+          this.resolvedIdentities.push(identity); // store identity in the idp
+          resolve(identity); // return the identity
+        })
+        // failed to resolve the messaging stub
+        .catch((error) => {
+          reject(new Error(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`));
+        });
     });
   }
 
@@ -243,16 +242,9 @@ export class Idp {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
     return new Promise((resolve, reject) => {
-      import(localMsgStubUrl).then((msgStub: IMessagingStub) => {
-        console.log('[Idp getMsgStub] received stub: ', msgStub);
-        resolve(msgStub);
-      }, error => {
-        reject(Error(`
-            Idp getMsgStub] messaging stub could not be retrieved from URL;
-            possibly a malformed URL or the server is unreachable: ${error}`
-        ));
-      }
-      );
+      const msgStub: IMessagingStub = require(localMsgStubUrl);
+      console.log('[Idp getMsgStub] received stub: ', msgStub);
+      resolve(msgStub);
     });
   }
 }
