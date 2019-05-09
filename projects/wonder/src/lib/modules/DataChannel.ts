@@ -9,7 +9,12 @@ import { DataChannelBroker } from './DataChannelBroker';
 import { DataChannelEvtHandler } from './DataChannelEvtHandler';
 
 export class DataChannel {
-  static establish(wonderInstance: Wonder, recipient: string, conversation: Conversation, payloadType: string) {
+  static establish(
+    wonderInstance: Wonder,
+    recipient: string,
+    conversation: Conversation,
+    payloadType: string | true | {[key: string]: any}
+  ) {
     return new Promise((resolve, reject) => {
 
       if (typeof recipient !== 'string') {
