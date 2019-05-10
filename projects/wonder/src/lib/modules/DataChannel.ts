@@ -13,7 +13,7 @@ export class DataChannel {
     wonderInstance: Wonder,
     recipient: string,
     conversation: Conversation,
-    payloadType: string | true | {[key: string]: any}
+    payloadType: string | boolean
   ) {
     return new Promise((resolve, reject) => {
 

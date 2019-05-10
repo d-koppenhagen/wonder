@@ -80,7 +80,7 @@ export class DataChannelBroker {
   addDataChannelCodec(
     from: Identity,
     to: Identity,
-    payloadType: string,
+    payloadType: string | boolean,
     dataChannelEvtHandler: DataChannelEvtHandler
   ): Promise<any> {
     const that = this;
@@ -88,17 +88,21 @@ export class DataChannelBroker {
 
     return new Promise((resolve, reject) => {
       // when no codecs were webfingered from bob or the payloadType doesn't match the codecs
-      if (!to.codecs || !to.codecs[payloadType]) {
-        // check if the codec doesn't matter
-        if (payloadType === 'true') {
+      if (typeof payloadType === 'boolean') {
+        if (payloadType) {
           payloadType = PayloadType.plain; // fallback to codec plain
         } else { // alice is requesting a codec that bob doesn't have
-          errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload type not found for the remote participant');
+          errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload set to false');
           reject(errMsg);
           return errMsg;
         }
-      } // else payload type found
-
+      } else if (!to.codecs || !to.codecs[payloadType]) {
+        payloadType = PayloadType.plain; // fallback to codec plain
+      } else { // alice is requesting a codec that bob doesn't have
+        errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload type not found for the remote participant');
+        reject(errMsg);
+        return errMsg;
+      }
       that.getCodec(to.codecs[payloadType]) // get the codec file
         .then((codec: ICodec) => { // iterate through the object and resolve missing hierarchies
           if (!that.codecMap[from.rtcIdentity]) {
@@ -110,7 +114,7 @@ export class DataChannelBroker {
           if (!that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType]) {
             that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType] = {};
           }
-          that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].url = to.codecs[payloadType]; // write the url
+          that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].url = to.codecs[payloadType as string]; // write the url
           that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].dataChannelEvtHandler = dataChannelEvtHandler; // save the handler
           resolve(codec); // resolve the promise of addDataChannelCodec
         })

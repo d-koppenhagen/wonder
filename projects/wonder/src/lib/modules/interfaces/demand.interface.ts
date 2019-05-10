@@ -6,7 +6,7 @@ export interface IDemand {
 export interface IDemandSingleDirection {
   audio?: boolean | { [key: string]: any };
   video?: boolean | { [key: string]: any };
-  data?: boolean | { [key: string]: any } | string;
+  data?: boolean | string;
 }
 
 export type AudioVideoDataAll = 'audio' | 'video' | 'data' | 'all' | '';
