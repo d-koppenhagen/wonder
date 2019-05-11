@@ -87,7 +87,9 @@ export class Conversation {
    * @example conversation.leave();
    */
   leave() {
-    this.myParticipant.peerConnection.close();
+    if (this.myParticipant && this.myParticipant.peerConnection) {
+      this.myParticipant.peerConnection.close();
+    }
     this.remoteParticipants.forEach((participant: Participant) => {
       // this will trigger the iceconnectionstatechange event on the remote end
       // remote end needs to check pc.iceConnectionState == disconnected
