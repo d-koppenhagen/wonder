@@ -25,9 +25,6 @@ class ParticipantMock {
     public identity: IdentityMock,
     public demand
   ) {}
-  getRtcPeerConnection() {
-    return this.peerConnection;
-  }
   setRtcPeerConnection() {}
   updateDemand() {}
 }

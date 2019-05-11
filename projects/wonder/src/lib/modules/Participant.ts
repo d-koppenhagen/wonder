@@ -32,13 +32,6 @@ export class Participant {
   ) { }
 
   /**
-   * @desc Returns the RtcPeerConnection of this participant
-   */
-  getRtcPeerConnection(): RTCPeerConnection {
-    return this.peerConnection;
-  }
-
-  /**
    * @desc Sets the RtcPeerConnection of this participant
    */
   setRtcPeerConnection(rtcPeerConnection: RTCPeerConnection) {
