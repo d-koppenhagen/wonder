@@ -241,10 +241,17 @@ export class Idp {
   private getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
+    console.log(localMsgStubUrl);
     return new Promise((resolve, reject) => {
-      const msgStub: IMessagingStub = require(localMsgStubUrl);
-      console.log('[Idp getMsgStub] received stub: ', msgStub);
-      resolve(msgStub);
+      console.log('AAA');
+
+      const msgStub: IMessagingStub = require(localMsgStubUrl)
+        .then((stub: any) => {
+          console.log('[Idp getMsgStub] received stub: ', msgStub);
+          resolve(msgStub);
+        }, (err) => {
+          reject(err);
+        });
     });
   }
 }
