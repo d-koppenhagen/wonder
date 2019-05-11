@@ -2,6 +2,26 @@ import { Participant } from './Participant';
 import { Wonder } from '../wonder';
 import { Identity } from './Identity';
 
+class ConversationMock {
+  id;
+  myParticipant;
+  remoteParticipants = [];
+  msgEvtHandler;
+  rtcEvtHandler = {
+    onEvt: (evt) => {}
+  };
+  dataChannelEvtHandler;
+  msgStub;
+  msgSrv;
+  dataChannelBroker;
+  constructor(
+    public wonderInstance
+  ) {}
+  leave() {}
+  addRemoteParticipant() {}
+  getRemoteParticipant() {}
+}
+
 describe('Participant', () => {
   let participant;
 
@@ -27,26 +47,6 @@ describe('Participant', () => {
       data: false
     }
   };
-
-  class ConversationMock {
-    id;
-    myParticipant;
-    remoteParticipants = [];
-    msgEvtHandler;
-    rtcEvtHandler = {
-      onEvt: (evt) => {}
-    };
-    dataChannelEvtHandler;
-    msgStub;
-    msgSrv;
-    dataChannelBroker;
-    constructor(
-      public wonderInstance
-    ) {}
-    leave() {}
-    addRemoteParticipant() {}
-    getRemoteParticipant() {}
-  }
 
   beforeEach(() => {
     participant = new Participant(

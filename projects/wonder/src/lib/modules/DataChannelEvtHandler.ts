@@ -9,7 +9,7 @@ export class DataChannelEvtHandler {
   /**
    * @desc A reference to the data channel for which the data channel event handler handles events
    */
-  dataChannel: RTCDataChannel;
+  dataChannel: RTCDataChannel = null;
 
   constructor(
     /**

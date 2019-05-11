@@ -20,6 +20,7 @@ describe('Idp', () => {
       'alice@id.d-koppenhagen.de'
     );
 
+
     /*
     idp.getIdentity('bob@id.d-koppenhagen.de').then((identiy) => {
       console.log(identiy);
