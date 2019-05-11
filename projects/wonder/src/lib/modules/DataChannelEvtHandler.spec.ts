@@ -62,5 +62,4 @@ describe('DataChannelEvtHandler', () => {
     expect(dataChannelEvtHandler.dataChannel).toBe(null);
   });
 
-
 });
