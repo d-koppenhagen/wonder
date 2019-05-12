@@ -35,33 +35,24 @@ export class DataChannelEvtHandler {
    * codec.dataChannel.onmessage = codec.onDataMessage.bind(codec);
    * codec.onMessage = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
    */
-  onEvt(evt: { type }) { // getting the conversation from the constructor doesnt work as on
+  onEvt(evt: { type: any }) { // getting the conversation from the constructor doesnt work as on
     console.log('[DataChannelEvtHandler] event:', evt);
 
     switch (evt.type) {
       case DataChannelEvtType.onopen:
         // console.log('this should be never ever called');
-        console.log('[DataChannelEvtHandler onEvt] onopen', evt);
         // if the data channel is established the onmessage listener can be called
         if (this.dataChannel.readyState === 'open') {
           this.dataChannel.onmessage = this.onEvt;
         }
         break;
-
       case DataChannelEvtType.onclose:
-        console.log('[DataChannelEvtHandler onEvt] onclose', evt);
         break;
-
       case DataChannelEvtType.ondatachannel:
-        console.log('[DataChannelEvtHandler onEvt] ondatachannel', evt);
         break;
-
       case DataChannelEvtType.onmessage:
-        console.log('[DataChannelEvtHandler onEvt] onmessage', evt);
         break;
-
       default:
-        console.log('[DataChannelEvtHandler onEvt] default', evt);
         break;
     }
 

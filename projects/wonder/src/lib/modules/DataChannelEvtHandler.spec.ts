@@ -62,4 +62,20 @@ describe('DataChannelEvtHandler', () => {
     expect(dataChannelEvtHandler.dataChannel).toBe(null);
   });
 
+  it('should handle incoming events and propagate them through wonderInstance', () => {
+    const pc = new RTCPeerConnection();
+    const channel = pc.createDataChannel('chat');
+    dataChannelEvtHandler.dataChannel = channel;
+
+    spyOn(dataChannelEvtHandler.wonderInstance, 'onDataChannelEvt');
+
+    dataChannelEvtHandler.onEvt({
+      type: 'open'
+    });
+
+    expect(dataChannelEvtHandler.wonderInstance.onDataChannelEvt).toHaveBeenCalledWith({
+      type: 'open'
+    });
+  });
+
 });
