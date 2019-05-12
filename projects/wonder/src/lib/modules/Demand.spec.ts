@@ -1,6 +1,6 @@
 import { Demand } from './Demand';
 
-describe('DemandClass', () => {
+describe('Demand', () => {
   const expectedAllTrue = {
     in: { audio: true, video: true, data: true },
     out: { audio: true, video: true, data: true }

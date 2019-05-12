@@ -90,9 +90,9 @@ export class DataChannel {
             // overwrite the codec with the help of its constructor
             // create the datachannel and assign it to the codec
             codec.dataChannel = conversation.myParticipant.peerConnection.createDataChannel(guid());
-            codec.dataChannel.payloadType = payloadType;
+            // codec.dataChannel.payloadType = payloadType;
             // register the handler which will receive the message after the codec is finished decoding the message
-            codec.onMessage = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
+            codec.onDataMessage = dataChannelEvtHandler.onEvt.bind(dataChannelEvtHandler);
             codec.from = conversation.myParticipant.identity; // tell the codec from whom messages are coming to be sent over the channel
             codec.to = identity; // tell the codec who the receiver is, can be helpful i.e. for chat communication
 

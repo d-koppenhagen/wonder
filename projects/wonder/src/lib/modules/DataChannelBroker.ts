@@ -82,8 +82,7 @@ export class DataChannelBroker {
     to: Identity,
     payloadType: string | boolean,
     dataChannelEvtHandler: DataChannelEvtHandler
-  ): Promise<any> {
-    const that = this;
+  ): Promise<ICodec> {
     let errMsg;
 
     return new Promise((resolve, reject) => {
@@ -91,31 +90,31 @@ export class DataChannelBroker {
       if (typeof payloadType === 'boolean') {
         if (payloadType) {
           payloadType = PayloadType.plain; // fallback to codec plain
-        } else { // alice is requesting a codec that bob doesn't have
+        } else { // alice is requesting a codec this bob doesn't have
           errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload set to false');
           reject(errMsg);
           return errMsg;
         }
       } else if (!to.codecs || !to.codecs[payloadType]) {
         payloadType = PayloadType.plain; // fallback to codec plain
-      } else { // alice is requesting a codec that bob doesn't have
+      } else { // alice is requesting a codec this bob doesn't have
         errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload type not found for the remote participant');
         reject(errMsg);
         return errMsg;
       }
-      that.getCodec(to.codecs[payloadType]) // get the codec file
+      this.getCodec(to.codecs[payloadType]) // get the codec file
         .then((codec: ICodec) => { // iterate through the object and resolve missing hierarchies
-          if (!that.codecMap[from.rtcIdentity]) {
-            that.codecMap[from.rtcIdentity] = {};
+          if (!this.codecMap[from.rtcIdentity]) {
+            this.codecMap[from.rtcIdentity] = {};
           }
-          if (!that.codecMap[from.rtcIdentity][to.rtcIdentity]) {
-            that.codecMap[from.rtcIdentity][to.rtcIdentity] = {};
+          if (!this.codecMap[from.rtcIdentity][to.rtcIdentity]) {
+            this.codecMap[from.rtcIdentity][to.rtcIdentity] = {};
           }
-          if (!that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType]) {
-            that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType] = {};
+          if (!this.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType]) {
+            this.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType] = {};
           }
-          that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].url = to.codecs[payloadType as string]; // write the url
-          that.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].dataChannelEvtHandler = dataChannelEvtHandler; // save the handler
+          this.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].url = to.codecs[payloadType as string]; // write the url
+          this.codecMap[from.rtcIdentity][to.rtcIdentity][payloadType].dataChannelEvtHandler = dataChannelEvtHandler; // save the handler
           resolve(codec); // resolve the promise of addDataChannelCodec
         })
         .catch((error) => {
@@ -173,9 +172,7 @@ export class DataChannelBroker {
    *   console.error('Error found: ', error);
    * });
    */
-  getCodec(codecUrl: string): Promise<{}> {
-    const that = this;
-
+  private getCodec(codecUrl: string): Promise<ICodec> {
     return new Promise((resolve, reject) => {
       // error handling
       if (!codecUrl) {
@@ -184,12 +181,12 @@ export class DataChannelBroker {
       }
 
       // search for the codec by URL
-      if (that.codecs && that.codecs[codecUrl]) {
-        resolve(that.codecs[codecUrl]);
+      if (this.codecs && this.codecs[codecUrl]) {
+        resolve(this.codecs[codecUrl]);
         return;
       } else { // if it isn't present download the codec with the URL
         import(codecUrl).then((codec: ICodec) => {
-          that.codecs[codecUrl] = codec; // save it locally
+          this.codecs[codecUrl] = codec; // save it locally
           resolve(codec); // and return it
         }, error => { // failed to receive the codec
           reject(new Error(`[DataChannelBroker getCodec] the codec could not be retrieved from the remote server: ${error}`));
