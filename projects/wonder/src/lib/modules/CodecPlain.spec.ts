@@ -28,16 +28,21 @@ describe('Codec', () => {
     spyOn(channel2, 'send');
 
     codec.send('message', channel2);
-
-    expect(channel2.send).toHaveBeenCalledWith('"message"');
+    expect(channel2.send).toHaveBeenCalledWith('message');
   });
 
   it('should send a message through constructed datachannel', () => {
     spyOn(codec.dataChannel, 'send');
 
     codec.send('message', codec.dataChannel);
+    expect(codec.dataChannel.send).toHaveBeenCalledWith('message');
+  });
 
-    expect(codec.dataChannel.send).toHaveBeenCalledWith('"message"');
+  it('should send a JSON message as string through datachannel', () => {
+    spyOn(codec.dataChannel, 'send');
+
+    codec.send('{ key: "data", key2: ["data2"] }', codec.dataChannel);
+    expect(codec.dataChannel.send).toHaveBeenCalledWith('{ key: "data", key2: ["data2"] }');
   });
 
 });
