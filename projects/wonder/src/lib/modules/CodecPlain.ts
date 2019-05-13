@@ -19,7 +19,7 @@ export class Codec implements ICodec {
   /**
    * send function
    */
-  send(input: string, dataChannel: RTCDataChannel) {
+  send(input: string, dataChannel?: RTCDataChannel) {
     console.log('[Codec Plain] send:', input, dataChannel);
     if (dataChannel) { // when used as a general codec for many data channels
       dataChannel.send(JSON.stringify(input));
