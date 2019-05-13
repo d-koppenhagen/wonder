@@ -7,6 +7,7 @@ import { Participant } from './modules/Participant';
 import { MsgEvtHandler } from './modules/MsgEvtHandler';
 import { IBaseConfig } from './modules/interfaces';
 import { IDemand } from './modules/interfaces/demand.interface';
+import { errorHandler } from './modules/helpfunctions';
 
 /**
  * @desc WebRTC framework to facilitate the development of Applications which seamlessly interoperate with each other
@@ -145,71 +146,64 @@ export class Wonder {
    *   // use the identity to extract the user's aliases, avatar or other information
    * });
    */
-  login(
+  async login(
     myRtcIdentity: string,
     credentials: { [key: string]: any } | string,
     successCallback?: (identity: Identity) => void,
     errorCallback?: (errorMessage: string) => void
   ): Promise<Identity> {
-    const that = this;
-    let errMsg = null;
+    let errMsg = '';
 
     console.log('[WONDER login] login with:', myRtcIdentity);
 
-    return new Promise((resolve, reject) => {
-
-      // errorCallback handling
-      if (!myRtcIdentity) {
-        errMsg = new Error('[WONDER login] errorCallback: no login name received');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
+    // errorCallback handling
+    if (!myRtcIdentity) {
+      errMsg = '[WONDER login] errorCallback: no login name received';
+      console.error(errMsg);
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
+    if (!credentials) { credentials = ''; }
+    if (!this.localIdp) {
+      if (this.config.idp === 'webfinger') {
+        console.log('[WONDER login] looking for identities using Webfinger...');
+        this.localIdp = new Idp('webfinger', myRtcIdentity);
+      } else if (typeof this.config.idp === 'object') {
+        this.localIdp = new Idp(this.config.idp.url + ':' + this.config.idp.port + this.config.idp.path, myRtcIdentity);
+      } else {
+        errMsg = '[WONDER login] errorCallback: Wrong idp format in configuration';
+        errorHandler(errMsg, errorCallback);
       }
-      if (credentials === undefined || credentials === null) { credentials = ''; }
-      if (!that.localIdp) {
-        if (typeof that.config.idp === 'string' && that.config.idp === 'webfinger') {
-          console.log('[WONDER login] looking for identities using Webfinger...');
-          that.localIdp = new Idp('webfinger', myRtcIdentity);
-        } else if (typeof that.config.idp === 'object') {
-          that.localIdp = new Idp(that.config.idp.url + ':' + that.config.idp.port + that.config.idp.path, myRtcIdentity);
-        } else {
-          errMsg = new Error('[WONDER login] errorCallback: Wrong idp format in configuration');
-          reject(errMsg);
-          if (errorCallback) { errorCallback(errMsg); }
-          return;
-        }
-      }
+    }
 
-      that.localIdp.getIdentity(myRtcIdentity, credentials)
-        .then((identity: Identity) => {
-          console.log('[WONDER login]: got identity: ', identity);
-          that.myIdentity = identity;
-          const invitationHandler = new MsgEvtHandler(that); // we need to receive invitations
-          // as we are registering the handler on the messaging stub we need to replace the reference to
-          // this == msgStub with this == invitationHandler
-          identity.msgStub.onMessage = invitationHandler.onMessage.bind(invitationHandler);
-          // SD 06.10.15: add credentials to the identity
-          identity.credentials = credentials;
+    this.localIdp.getIdentity(myRtcIdentity, credentials)
+      .then((identity: Identity) => {
+        console.log('[WONDER login]: got identity: ', identity);
+        this.myIdentity = identity;
+        const invitationHandler = new MsgEvtHandler(this); // we need to receive invitations
+        // as we are registering the handler on the messaging stub we need to replace the reference to
+        // this == msgStub with this == invitationHandler
+        identity.msgStub.onMessage = invitationHandler.onMessage.bind(invitationHandler);
+        // SD 06.10.15: add credentials to the identity
+        identity.credentials = credentials;
 
-          identity.msgStub.connect( // and connect to the own mesaging server
-            identity.rtcIdentity,
-            identity.credentials,
-            identity.msgSrv,
-            () => { // successCallback connecting
-              console.log('[WONDER login] connected to msgServer of identity: ', identity);
-              resolve(identity);
-              if (successCallback) { successCallback(identity); }
+        identity.msgStub.connect( // and connect to the own mesaging server
+          identity.rtcIdentity,
+          identity.credentials,
+          identity.msgSrv,
+          () => { // successCallback connecting
+            console.log('[WONDER login] connected to msgServer of identity: ', identity);
+            if (successCallback) {
+              successCallback(identity);
             }
-          );
-
-        })
-        .catch((err: any) => { // possibly a network errorCallback
-          errMsg = new Error(`[WONDER login] ${err}`);
-          reject(errMsg);
-          if (errorCallback) { errorCallback(errMsg); }
-          return;
-        });
-    });
+            return identity;
+          }
+        );
+      })
+      .catch((err: any) => { // possibly a network errorCallback
+        errMsg = `[WONDER login] ${err}`;
+        errorHandler(errMsg, errorCallback);
+      });
   }
 
    /**
@@ -220,270 +214,248 @@ export class Wonder {
     *   // show video and send chat messages
     * });
     */
-  call(
+  async call(
     recipients: string[] | string,
     rawDemand: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
     successCallback?: (conversationId: string) => void,
     errorCallback?: (errorMessage: string) => void
   ): Promise<string> {
-    const that = this;
     let errMsg = null;
 
-    return new Promise((resolve, reject) => {
-      // errorCallback handling
-      if (!recipients) {
-        errMsg = new Error('[WONDER call] no recipients');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
-      if (!rawDemand) {
-        errMsg = new Error('[WONDER call] no demand');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
+    // errorCallback handling
+    if (!recipients) {
+      errMsg = '[WONDER call] no recipients';
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
+    if (!rawDemand) {
+      errMsg = new Error('[WONDER call] no demand');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
 
-      const demand: IDemand = new Demand(rawDemand).converted; // convert the demand to the standard format
+    const demand: IDemand = new Demand(rawDemand).converted; // convert the demand to the standard format
 
-      // TODO: only do that if no conversationId is given
-      let existingConversation = null;
-      if (typeof recipients === 'string' || recipients instanceof String) {
-        // check if te remote rtcIdentity is already in a conversation
-        existingConversation = that.conversations.filter(
-          c => c.remoteParticipants.find(
-            p => p.identity.rtcIdentity === recipients
-          )
-        );
-      }
-      let conversation = null;
+    // TODO: only do this if no conversationId is given
+    let existingConversation = null;
+    if (typeof recipients === 'string' || recipients instanceof String) {
+      // check if te remote rtcIdentity is already in a conversation
+      existingConversation = this.conversations.filter(
+        c => c.remoteParticipants.find(
+          p => p.identity.rtcIdentity === recipients
+        )
+      );
+    }
+    let conversation = null;
 
-      if (!existingConversation) {
-        // create a new conversation
-        const participant = new Participant(that, that.myIdentity, demand);
-        conversation = new Conversation(that, participant); // create me and set me as the owner
-        conversation.myParticipant = conversation.owner; // copy the reference to me
-        that.conversations.push(conversation); // add the conversation to wonder
-        conversation.myParticipant.setRtcPeerConnection(
-          new RTCPeerConnection({
-            iceServers: that.config.ice // name of key needs to be iceServers in RTCPeerConnection
+    if (!existingConversation) {
+      // create a new conversation
+      const participant = new Participant(this, this.myIdentity, demand);
+      conversation = new Conversation(this, participant); // create me and set me as the owner
+      conversation.myParticipant = conversation.owner; // copy the reference to me
+      this.conversations.push(conversation); // add the conversation to wonder
+      conversation.myParticipant.setRtcPeerConnection(
+        new RTCPeerConnection({
+          iceServers: this.config.ice // name of key needs to be iceServers in RTCPeerConnection
+        })
+      );
+    } else {
+      conversation = existingConversation;
+      conversation.myParticipant.updateDemand(demand);
+    }
+
+    // set ice handling to false before receiving all sdp messages to avoid ICE errors
+    conversation.msgEvtHandler.ice = false;
+
+    // dynamically load a file for a specific use case
+    // require file for a multiparty call
+    if (recipients instanceof Array) {
+      // TODO: implement multiparty support
+      errorHandler('[wonder call] multiparty no yet implemented');
+      return;
+      if (demand.out.video || demand.out.audio) {
+        import('./modules/callMultiple')
+          .then((CallMultiple: any) => {
+            return CallMultiple.call(this, recipients, conversation);
           })
-        );
-      } else {
-        conversation = existingConversation;
-        conversation.myParticipant.updateDemand(demand);
-      }
-
-      // set ice handling to false before receiving all sdp messages to avoid ICE errors
-      conversation.msgEvtHandler.ice = false;
-
-      // dynamically load a file for a specific use case
-      // require file for a multiparty call
-      if (recipients instanceof Array) {
-        // TODO: implement multiparty support
-
-        console.error('[wonder call] multiparty no yet implemented');
-
-        if (demand.out.video || demand.out.audio) {
-          import('./modules/callMultiple')
-            .then((CallMultiple: any) => {
-              CallMultiple.call(that, recipients, conversation)
-                .then((cId: string) => {
-                  resolve(cId);
-                  if (successCallback) { successCallback(cId); }
-                })
-                .catch((error) => {
-                  errMsg = new Error(`[WONDER call] Error in callMultiple occured: ${error}`);
-                  reject(errMsg);
-                  if (errorCallback) { errorCallback(errMsg); }
-                  return;
-                });
-            });
-        }
-      } else if (typeof recipients === 'string') { // require file for a single call
-        // start a video / audio call
-        if (demand.out.video || demand.out.audio) {
-          const callSingle: typeof import('./modules/callSingle') = require('./modules/callSingle');
-          callSingle.CallSingle.call(that, recipients, conversation, demand)
-            .then((cId: string) => {
-              resolve(cId);
-              if (successCallback) { successCallback(cId); }
-            })
-            .catch((error: any) => {
-              errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
-              reject(errMsg);
-              if (errorCallback) { errorCallback(errMsg); }
-              return;
-            });
-        }
-        // start a data channel
-        if (demand.out.data) {
-          const dataChannel: typeof import('./modules/DataChannel') = require('./modules/DataChannel');
-          // also hand over the data object to tell what payload type is wanted
-          dataChannel.DataChannel.establish(that, recipients, conversation, demand.out.data)
           .then((cId: string) => {
-            resolve(conversationId);
+            if (successCallback) { successCallback(cId); }
+            return cId;
+          })
+          .catch((error) => {
+            errMsg = new Error(`[WONDER call] Error in callMultiple occured: ${error}`);
+            errorHandler(errMsg, errorCallback);
+            return;
+          });
+      }
+    } else if (typeof recipients === 'string') { // require file for a single call
+      // start a video / audio call
+      if (demand.out.video || demand.out.audio) {
+        const callSingle: typeof import('./modules/callSingle') = require('./modules/callSingle');
+        callSingle.CallSingle
+          .call(this, recipients, conversation, demand)
+          .then((cId: string) => {
+            if (successCallback) { successCallback(cId); }
+            return cId;
+          })
+          .catch((error: any) => {
+            errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
+            errorHandler(errMsg, errorCallback);
+            return;
+          });
+      }
+      // start a data channel
+      if (demand.out.data) {
+        const dataChannel: typeof import('./modules/DataChannel') = require('./modules/DataChannel');
+        // also hand over the data object to tell what payload type is wanted
+        dataChannel.DataChannel
+          .establish(this, recipients, conversation, demand.out.data)
+          .then((cId: string) => {
             if (successCallback) { successCallback(conversationId); }
+            return conversationId;
           })
           .catch((error: any) => {
             errMsg = new Error(`[WONDER call] Error in dataChannel occured: ${error}`);
-            reject(errMsg);
-            if (errorCallback) { errorCallback(errMsg); }
+            errorHandler(errMsg, errorCallback);
             return;
           });
-
-        }
-      } else {
-        errMsg = new Error('[WONDER call] cannot determine wether it is a multi or single party call');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
       }
-    });
+    } else {
+      errMsg = new Error('[WONDER call] cannot determine wether it is a multi or single party call');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
+
   }
 
   /**
    * @desc A function to remove a reciepient from an existing conversation
    * only used for multiparty calls
    */
-  removeRecipients(
+  async removeRecipients(
     recipients: string[] | string,
     conversationId: string,
     successCallback?: (success: boolean) => void,
     errorCallback?: (errorMessage: any) => void
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      // errorCallback handling
-      if (!recipients) {
-        const errMsg = new Error('[WONDER removeRecipients] errorCallback: no reciepients given');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
-      // force an array construct
-      let rcpt = [];
-      if (typeof recipients === 'string') {
-        rcpt.push(recipients);
-      } else {
-        rcpt = recipients;
-      }
+    // errorCallback handling
+    if (!recipients) {
+      const errMsg = new Error('[WONDER removeRecipients] errorCallback: no reciepients given');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
+    // force an array construct
+    let rcpt = [];
+    if (typeof recipients === 'string') {
+      rcpt.push(recipients);
+    } else {
+      rcpt = recipients;
+    }
 
-      // TODO : implement
-      // conversation.addParticipant(participant, invitationBody, constraints, function(){resolve()}, function(){reject()});
-
-    });
+    // TODO : implement
   }
 
   /**
    * @desc Add demand to an existing conversation
    */
-  addDemand(
+  async addDemand(
     type: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
     successCallback?: () => void,
     errorCallback?: (errorMessage: any) => void,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      // errorCallback handling
-      if (!type) {
-        const errMsg = new Error('[WONDER addDemand] errorCallback: no type given');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
-    });
+    // errorCallback handling
+    if (!type) {
+      const errMsg = new Error('[WONDER addDemand] errorCallback: no type given');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
   }
 
   /**
    * @desc Remove demand from an existing conversation
    */
-  removeDemand(
+  async removeDemand(
     type: string | string[] | { [key: string]: any } | Demand,
     conversationId: string,
     successCallback?: () => void,
     errorCallback?: (errorMessage: any) => void,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      // errorCallback handling
-      if (!type) {
-        const errMsg = new Error('[WONDER removeDemand] errorCallback: no type given');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
-    });
+    // errorCallback handling
+    if (!type) {
+      const errMsg = new Error('[WONDER removeDemand] errorCallback: no type given');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
   }
 
   /**
    * @desc A function to logout a user from his and all other messaging servers.
    * The hangup function will be called to close all conversations.
    */
-  logout(successCallback?: (success: boolean) => void, errorCallback?: (errorMessage: string) => void): Promise<boolean> {
-    const that = this;
+  async logout(
+    successCallback?: (success: boolean) => void,
+    errorCallback?: (errorMessage: string) => void
+  ): Promise<boolean> {
     let errMsg = null;
 
-    return new Promise((resolve, reject) => {
-      // errorCallback handling
-      if (!that.myIdentity) {
-        errMsg = new Error('[WONDER logout] not logged in');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
+    // errorCallback handling
+    if (!this.myIdentity) {
+      errMsg = new Error('[WONDER logout] not logged in');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
 
-      // hangup all conversations
-      if (that.conversations.length > 0) { that.hangup(); }
+    // hangup all conversations
+    if (this.conversations.length > 0) {
+      await this.hangup();
+    }
 
-      // disconnect from own messaging server
-      if (that.myIdentity.msgStub) {
-        that.myIdentity.msgStub.disconnect();
-      } else {
-        errMsg = new Error('[WONDER logout] no messaging Stub present');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-        return;
-      }
+    // disconnect from own messaging server
+    if (this.myIdentity.msgStub) {
+      this.myIdentity.msgStub.disconnect();
+    } else {
+      errMsg = new Error('[WONDER logout] no messaging Stub present');
+      errorHandler(errMsg, errorCallback);
+      return;
+    }
 
-      resolve(true);
-      if (successCallback) { successCallback(true); }
-    });
+    if (successCallback) { successCallback(true); }
+    return true;
   }
 
   /**
    * @desc A function to hangup a single conversation or all conversations.
    * @example wonder.hangup(conversationId).then( function(){ ... } );
    */
-  hangup(
+  async hangup(
     conversationId?: string,
     successCallback?: (success: boolean) => void,
     errorCallback?: (errorMessage: string) => void
   ): Promise<boolean> {
-    const that = this;
     let errMsg = null;
 
-    return new Promise((resolve, reject) => {
-      // error handling
-      if (that.conversations.length === 0) {
-        errMsg = new Error('[WONDER hangup] no conversation present');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-      }
+    // error handling
+    if (this.conversations.length === 0) {
+      errMsg = new Error('[WONDER hangup] no conversation present');
+      errorHandler(errMsg, errorCallback);
+      return false;
+    }
 
-      if (!conversationId) { // hangup all conversations
-        that.conversations.forEach(c => c.leave());
-        that.conversations = [];
-      } else { // close a single conversation
-        let conversation = that.conversations.find((con) => {
-          return con.id === conversationId;
-        });
-        conversation.leave();
-        conversation = null; // TODO: check if a conversation of null is still in the array
-      }
+    if (!conversationId) { // hangup all conversations
+      this.conversations.forEach(c => c.leave());
+      this.conversations = [];
+    } else { // close a single conversation
+      let conversation = this.conversations.find((con) => {
+        return con.id === conversationId;
+      });
+      conversation.leave();
+      conversation = null;
+    }
 
-      resolve(true);
-      if (successCallback) { successCallback(true); }
-    });
+    if (successCallback) { successCallback(true); }
+    return true;
   }
 
    /**
@@ -495,7 +467,7 @@ export class Wonder {
     *   // success
     * });
     */
-  dataChannelMsg(
+  async dataChannelMsg(
     msg: {},
     type: string,
     conversationId: string,
@@ -503,46 +475,43 @@ export class Wonder {
     successCallback?: (successCallback: boolean) => void,
     errorCallback?: (errorMessage: string) => void
   ): Promise<boolean> {
-    const that = this;
     let errMsg = null;
-    console.log('[WONDER dataChannelMsg] ', msg);
-    return new Promise((resolve, reject) => {
-      if (that.conversations.length === 0) {
-        errMsg = new Error('[WONDER dataChannelMsg] no conversation present');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-      }
 
-      // if no conversation use the dafault single party call method
-      if (!conversationId) {
-        const remoteIdentity = that.conversations[0].remoteParticipants[0].identity;
-        try {
-          that.conversations[0].dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-            .send(msg, that.conversations[0].dataChannelEvtHandler.dataChannel);
-          resolve(true);
-          if (successCallback) { successCallback(true); }
-        } catch (err) {
-          errMsg = new Error('[WONDER dataChannelMsg] There is no dataChannel for this Codec established');
-          reject(errMsg);
-          if (errorCallback) { errorCallback(errMsg); }
-        }
-      } else { // else find the conversation
-        const conversation = that.conversations.find(con => {
-          return con.id === conversationId;
-        });
-        if (conversation) { // and if it was found send the message
-          const remoteIdentity = conversation.remoteParticipants[0].identity;
-          conversation.dataChannelBroker.getDataChannelCodec(that.myIdentity, remoteIdentity, type)
-            .send(msg, conversation.dataChannelEvtHandler.dataChannel);
-          resolve(true);
-          if (successCallback) { successCallback(true); }
-        } else { // and if not throw an error
-          errMsg = new Error('[WONDER dataChannelMsg] no conversation found');
-          reject(errMsg);
-          if (errorCallback) { errorCallback(errMsg); }
-        }
+    if (this.conversations.length === 0) {
+      errMsg = new Error('[WONDER dataChannelMsg] no conversation present');
+      errorHandler(errMsg, errorCallback);
+      return false;
+    }
+
+    // if no conversation use the dafault single party call method
+    if (!conversationId) {
+      const remoteIdentity = this.conversations[0].remoteParticipants[0].identity;
+      try {
+        this.conversations[0].dataChannelBroker
+          .getDataChannelCodec(this.myIdentity, remoteIdentity, type)
+          .send(msg, this.conversations[0].dataChannelEvtHandler.dataChannel);
+        if (successCallback) { successCallback(true); }
+        return true;
+      } catch (err) {
+        errMsg = new Error('[WONDER dataChannelMsg] There is no dataChannel for this Codec established');
+        errorHandler(errMsg, errorCallback);
       }
-    });
+    } else { // else find the conversation
+      const conversation = this.conversations.find(con => {
+        return con.id === conversationId;
+      });
+      if (conversation) { // and if it was found send the message
+        const remoteIdentity = conversation.remoteParticipants[0].identity;
+        conversation.dataChannelBroker
+          .getDataChannelCodec(this.myIdentity, remoteIdentity, type)
+          .send(msg, conversation.dataChannelEvtHandler.dataChannel);
+        if (successCallback) { successCallback(true); }
+        return true;
+      } else { // and if not throw an error
+        errMsg = new Error('[WONDER dataChannelMsg] no conversation found');
+        errorHandler(errMsg, errorCallback);
+      }
+    }
   }
 
   /**
@@ -568,30 +537,26 @@ export class Wonder {
    *     }
    *   }
    */
-  answerRequest(
+  async answerRequest(
     msg: Message,
     action: boolean,
     successCallback: (conversationId: string) => void,
     errorCallback: (errorMessage: string) => void
   ): Promise<string> {
-    const that = this;
     let errMsg = null;
 
-    return new Promise((resolve, reject) => {
-      const conversation = that.conversations.find(con => {
-        return con.id === msg.conversationId;
-      }
-      );
-      if (conversation) { // and if it was found send the message
-        conversation.msgEvtHandler.answerRequest(msg, action);
-        resolve(conversation.id);
-        if (successCallback) { successCallback(conversation.id); }
-      } else { // and if not throw an error
-        errMsg = new Error('[WONDER answerRequest] no conversation found');
-        reject(errMsg);
-        if (errorCallback) { errorCallback(errMsg); }
-      }
+    const conversation = this.conversations.find(con => {
+      return con.id === msg.conversationId;
     });
+
+    if (conversation) { // and if it was found send the message
+      conversation.msgEvtHandler.answerRequest(msg, action);
+      if (successCallback) { successCallback(conversation.id); }
+      return conversation.id;
+    } else { // and if not throw an error
+      errMsg = new Error('[WONDER answerRequest] no conversation found');
+      errorHandler(errMsg, errorCallback);
+    }
   }
 
 }

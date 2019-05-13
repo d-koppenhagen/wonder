@@ -16,6 +16,10 @@ export function guid(): string {
 /**
  * @desc This function logs errors
  */
-export function errorHandler(error) {
-  console.log(error);
+export function errorHandler(error: any, errorCallback?: (error: any) => void) {
+  if (errorCallback) {
+    errorCallback(error);
+  } else {
+    throw new Error(error);
+  }
 }
