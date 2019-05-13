@@ -2,10 +2,11 @@ import { Wonder } from '../wonder';
 import { IDemand } from './interfaces';
 import { Participant } from './Participant';
 import { Conversation } from './Conversation';
+import { errorHandler } from './helpfunctions';
 
 export class CallMultiple {
   static call(wonderInstance: Wonder, recipients: string[], conversation: Conversation, demand: IDemand) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       console.log('[callMultiple] Multiparty call to', recipients, 'with', demand);
 
@@ -22,7 +23,7 @@ export class CallMultiple {
             conversation.remoteParticipants.push(participant); // set the conversation's participants
             resolve(conversation.id);
           }).catch((error) => {
-            reject(new Error(`[callMultiple] error: ${error}`));
+            errorHandler(`[callMultiple] error: ${error}`);
           });
       });
     });

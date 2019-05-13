@@ -12,7 +12,7 @@ export class RtcEvtHandler {
   /**
    * @desc An array for buffering ICE candidate messages before they are sent
    */
-  msgbuf: Message[] | any = [];
+  msgbuf: Message[] = [];
 
   constructor(
     /**

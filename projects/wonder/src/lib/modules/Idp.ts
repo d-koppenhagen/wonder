@@ -2,6 +2,7 @@ import { IMessagingStub } from './interfaces';
 import { Identity } from './Identity';
 import { IJsonIdp } from './interfaces';
 import { IWebFinger } from './interfaces/webfinger.interface';
+import { errorHandler } from './helpfunctions';
 
 /**
  * @desc This class is the central class for resolving identities and exists only once in each wonder instance.
@@ -38,9 +39,9 @@ export class Idp {
   getIdentity(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
     const that = this;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!rtcIdentity) {
-        reject(new Error('[Idp getIdentity] no rtcIdentity parameter'));
+        errorHandler('[Idp getIdentity] no rtcIdentity parameter');
       }
 
       // return the resolved identity if it exists
@@ -60,12 +61,12 @@ export class Idp {
           if (identity) {
             resolve(identity);
           } else {
-            reject(new Error('[Idp getIdentity] no identity resolved from remote idp'));
+            errorHandler('[Idp getIdentity] no identity resolved from remote idp');
           }
         })
         // an error was thrown, possibly due to the network
         .catch((error) => {
-          reject(error);
+          errorHandler(error);
         });
 
     });
@@ -83,7 +84,7 @@ export class Idp {
       });
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve(resolvedIdentities);
     });
   }
@@ -93,9 +94,10 @@ export class Idp {
    * @desc Resolve an identity by asking the remote idp for information
    */
   private askRemoteIdp(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!rtcIdentity) {
-        reject(new Error('[Idp askRemoteIdp] no rtcIdentity in parameter'));
+        errorHandler('[Idp askRemoteIdp] no rtcIdentity in parameter');
+
       }
       console.log('[Idp askRemoteIdp] asking remote Idp...');
 
@@ -110,7 +112,7 @@ export class Idp {
               resolve(identity);
             });
         } catch (error) {
-          reject(new Error(`[Idp askRemoteIdp] webfinger not found ${error}`));
+          errorHandler(`[Idp askRemoteIdp] webfinger not found ${error}`);
         }
       } else {
         this.askJsonpIdp(rtcIdentity, credentials);
@@ -128,7 +130,7 @@ export class Idp {
     let remoteMessagingServer = null;
     const codecs = {};
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       // using the webfinger class
 
       const webfinger = new wf({
@@ -140,7 +142,7 @@ export class Idp {
 
       return webfinger.lookup(rtcIdentity, (err, data) => {
         if (err) {
-          reject((new Error(`[Idp askRemoteIdp] error: ${err.message}`)));
+          errorHandler(`[Idp askRemoteIdp] error: ${err.message}`);
         } else {
           console.log('[Idp askRemoteIdp] found Webfinger entry for', rtcIdentity, 'data:', data);
 
@@ -189,7 +191,7 @@ export class Idp {
             })
             // failed to resolve the messaging stub
             .catch((error) => {
-              reject(error);
+              errorHandler(error);
             });
         }
       });
@@ -205,7 +207,7 @@ export class Idp {
     let messagingServer = null;
     const codecs = {};
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const stubUrl = `${this.remoteIdp}${rtcIdentity}`;
       const data: IJsonIdp = require(stubUrl);
 
@@ -230,7 +232,7 @@ export class Idp {
         })
         // failed to resolve the messaging stub
         .catch((error) => {
-          reject(new Error(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`));
+          errorHandler(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`);
         });
     });
   }
@@ -242,7 +244,7 @@ export class Idp {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
 
     console.log(localMsgStubUrl);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       console.log('AAA');
 
       const msgStub: IMessagingStub = require(localMsgStubUrl)
@@ -250,7 +252,7 @@ export class Idp {
           console.log('[Idp getMsgStub] received stub: ', msgStub);
           resolve(msgStub);
         }, (err) => {
-          reject(err);
+          errorHandler(err);
         });
     });
   }

@@ -9,7 +9,7 @@ import { errorHandler } from './helpfunctions';
 
 export class CallSingle {
   static call(wonderInstance: Wonder, recipient: string, conversation: Conversation, demand: IDemand): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       console.log(conversation);
 
       // create remote identity and participant
@@ -42,7 +42,7 @@ export class CallSingle {
           conversation.msgStub.onMessage = conversation.msgEvtHandler.onMessage.bind(conversation.msgEvtHandler);
         })
         .catch((error) => {
-          reject(error);
+          errorHandler(`[callSingle] error: ${error}`);
         }) // Promise of getIdentity is over here
 
         // take the promise from getIdentity

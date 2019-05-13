@@ -15,7 +15,7 @@ export class DataChannel {
     conversation: Conversation,
     payloadType: string | boolean
   ) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       if (typeof recipient !== 'string') {
         return new Error('false type of recipient');
@@ -63,7 +63,7 @@ export class DataChannel {
           return identity; // pass identity to next .then-function
         })
         .catch((error) => {
-          reject(error);
+          errorHandler(`[DataChannel] error: ${error}`);
         }) // promise of getIdentity is over here
 
         // take the promise from getIdentity
@@ -137,7 +137,7 @@ export class DataChannel {
           },
             // DataChannelBroker download failed
             (error) => {
-              reject(Error(`[dataChannel] dataChannelBroker requiring failed: ${error}`));
+              errorHandler(`[dataChannel] dataChannelBroker requiring failed:  ${error}`);
             });
         }) // addDataChannelCodec promise ends here
         .catch((error) => {

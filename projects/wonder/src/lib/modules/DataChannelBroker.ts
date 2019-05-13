@@ -2,6 +2,7 @@ import { Identity } from './Identity';
 import { PayloadType } from './Types';
 import { ICodec } from './interfaces';
 import { DataChannelEvtHandler } from './DataChannelEvtHandler';
+import { errorHandler } from './helpfunctions';
 
 /**
  * @desc This class represents a data broker for codecs and their data channels
@@ -85,22 +86,22 @@ export class DataChannelBroker {
   ): Promise<ICodec> {
     let errMsg;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       // when no codecs were webfingered from bob or the payloadType doesn't match the codecs
       if (typeof payloadType === 'boolean') {
         if (payloadType) {
           payloadType = PayloadType.plain; // fallback to codec plain
         } else { // alice is requesting a codec this bob doesn't have
           errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload set to false');
-          reject(errMsg);
-          return errMsg;
+          errorHandler(errMsg);
+          return;
         }
       } else if (!to.codecs || !to.codecs[payloadType]) {
         payloadType = PayloadType.plain; // fallback to codec plain
       } else { // alice is requesting a codec this bob doesn't have
         errMsg = new Error('[DataChannelBroker addDataChannelCodec] Payload type not found for the remote participant');
-        reject(errMsg);
-        return errMsg;
+        errorHandler(errMsg);
+        return;
       }
       this.getCodec(to.codecs[payloadType]) // get the codec file
         .then((codec: ICodec) => { // iterate through the object and resolve missing hierarchies
@@ -119,8 +120,8 @@ export class DataChannelBroker {
         })
         .catch((error) => {
           errMsg = new Error(`[DataChannelBroker addDataChannelCodec] error saving the codec in the codecMap: ${error}`);
-          reject(errMsg);
-          return errMsg;
+          errorHandler(errMsg);
+          return;
         });
     });
   }
@@ -173,10 +174,10 @@ export class DataChannelBroker {
    * });
    */
   private getCodec(codecUrl: string): Promise<ICodec> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       // error handling
       if (!codecUrl) {
-        reject(Error('[DataChannelBroker getCodec] : no codecUrl specified'));
+        errorHandler('[DataChannelBroker getCodec] : no codecUrl specified');
         return;
       }
 
@@ -189,7 +190,7 @@ export class DataChannelBroker {
           this.codecs[codecUrl] = codec; // save it locally
           resolve(codec); // and return it
         }, error => { // failed to receive the codec
-          reject(new Error(`[DataChannelBroker getCodec] the codec could not be retrieved from the remote server: ${error}`));
+          errorHandler(`[DataChannelBroker getCodec] the codec could not be retrieved from the remote server: ${error}`);
         });
       }
     });
