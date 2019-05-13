@@ -275,7 +275,7 @@ export class Wonder {
       errorHandler('[wonder call] multiparty no yet implemented');
       return;
       if (demand.out.video || demand.out.audio) {
-        import('./modules/callMultiple')
+        import('./modules/CallMultiple')
           .then((CallMultiple: any) => {
             return CallMultiple.call(this, recipients, conversation);
           })
@@ -284,7 +284,7 @@ export class Wonder {
             return cId;
           })
           .catch((error) => {
-            errMsg = new Error(`[WONDER call] Error in callMultiple occured: ${error}`);
+            errMsg = new Error(`[WONDER call] Error in CallMultiple occured: ${error}`);
             errorHandler(errMsg, errorCallback);
             return;
           });
@@ -292,7 +292,7 @@ export class Wonder {
     } else if (typeof recipients === 'string') { // require file for a single call
       // start a video / audio call
       if (demand.out.video || demand.out.audio) {
-        const callSingle: typeof import('./modules/callSingle') = require('./modules/callSingle');
+        const callSingle: typeof import('./modules/CallSingle') = require('./modules/CallSingle');
         callSingle.CallSingle
           .call(this, recipients, conversation, demand)
           .then((cId: string) => {
@@ -300,7 +300,7 @@ export class Wonder {
             return cId;
           })
           .catch((error: any) => {
-            errMsg = new Error(`[WONDER call] Error in callSingle occured: ${error}`);
+            errMsg = new Error(`[WONDER call] Error in CallSingle occured: ${error}`);
             errorHandler(errMsg, errorCallback);
             return;
           });

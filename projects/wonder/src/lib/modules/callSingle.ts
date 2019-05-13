@@ -18,7 +18,7 @@ export class CallSingle {
         if (conversation.msgSrv === conversation.myParticipant.identity.msgSrv) {
           // remote identity exists on the same server as mine
           conversation.msgStub = conversation.myParticipant.identity.msgStub;
-          console.log('[callSingle] already connected to the remote participants msgServer');
+          console.log('[CallSingle] already connected to the remote participants msgServer');
         } else {
           // if its another server create a new connection
           conversation.msgStub = identity.msgStub.constructor(); // use the remote identity's msgStub
@@ -28,7 +28,7 @@ export class CallSingle {
             participant.identity.credentials, // use the remote participants credentials for that
             participant.identity.msgSrv, // the destination messaging server
             () => { // successfully connected
-              console.log('[callSingle] connected to REMOTE PARTICIPANTs msgServer');
+              console.log('[CallSingle] connected to REMOTE PARTICIPANTs msgServer');
               return conversation.id;
             }
           );
@@ -38,7 +38,7 @@ export class CallSingle {
         conversation.msgStub.onMessage = conversation.msgEvtHandler.onMessage.bind(conversation.msgEvtHandler);
       })
       .catch((error) => {
-        errorHandler(`[callSingle] error: ${error}`);
+        errorHandler(`[CallSingle] error: ${error}`);
       }) // Promise of getIdentity is over here
 
       // take the promise from getIdentity
@@ -60,12 +60,12 @@ export class CallSingle {
           })
           .then(() => {
             return conversation.myParticipant.peerConnection.createOffer().then((offer: RTCSessionDescriptionInit) => {
-              console.log('[callSingle] offer from alice: ', offer.sdp);
+              console.log('[CallSingle] offer from alice: ', offer.sdp);
               return conversation.myParticipant.peerConnection.setLocalDescription(offer);
             });
           })
           .then(() => {
-            console.log('[callSingle] local description success');
+            console.log('[CallSingle] local description success');
             const msg = MessageFactory.invitation( // create the message for the remote participant
               conversation.myParticipant.identity,
               conversation.remoteParticipants[0].identity,

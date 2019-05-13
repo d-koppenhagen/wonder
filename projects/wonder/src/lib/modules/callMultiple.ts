@@ -7,10 +7,10 @@ import { errorHandler } from './helpfunctions';
 export class CallMultiple {
   static async call(wonderInstance: Wonder, recipients: string[], conversation: Conversation, demand: IDemand) {
 
-    console.log('[callMultiple] Multiparty call to', recipients, 'with', demand);
+    console.log('[CallMultiple] Multiparty call to', recipients, 'with', demand);
 
     if (!(recipients instanceof Array)) {
-      return new Error('recipients has to be an array of Receipient');
+      return new Error('[CallMultiple] recipients has to be an array of Receipient');
     }
 
     // create remote identity and participant
@@ -22,7 +22,7 @@ export class CallMultiple {
           conversation.remoteParticipants.push(participant); // set the conversation's participants
           return conversation.id;
         }).catch((error) => {
-          errorHandler(`[callMultiple] error: ${error}`);
+          errorHandler(`[CallMultiple] error: ${error}`);
         });
     });
   }
