@@ -1,6 +1,5 @@
 import { Message } from './Message';
 import { Identity } from './Identity';
-import { MessageType } from './Types';
 import { MessageFactory } from './MessageFactory';
 
 describe('MessageFactory', () => {

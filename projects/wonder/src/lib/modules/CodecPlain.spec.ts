@@ -2,7 +2,6 @@ import { Codec } from './CodecPlain';
 
 describe('Codec', () => {
   let codec: Codec;
-  let dataChannel: RTCDataChannel;
   let onMessage;
 
   beforeEach(() => {

@@ -75,6 +75,7 @@ export class Conversation {
 
     /**
      * @desc The participant who owns the conversation which is usually the caller
+     * @Todo implement. This would be necessary for callMultiple
      */
     public owner?: Participant
   ) {

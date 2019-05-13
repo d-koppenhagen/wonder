@@ -159,7 +159,7 @@ export class Wonder {
     // errorCallback handling
     if (!myRtcIdentity) {
       errMsg = '[WONDER login] errorCallback: no login name received';
-      console.error(errMsg);
+      errorHandler(errMsg);
       errorHandler(errMsg, errorCallback);
       return;
     }

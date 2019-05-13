@@ -36,165 +36,133 @@ export class Idp {
   /**
    * @desc Return an Identity by searching resolved ones XOR resolve them on the fly
    */
-  getIdentity(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
-    const that = this;
+  async getIdentity(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
+    if (!rtcIdentity) {
+      errorHandler('[Idp getIdentity] no rtcIdentity parameter');
+      return;
+    }
 
-    return new Promise((resolve) => {
-      if (!rtcIdentity) {
-        errorHandler('[Idp getIdentity] no rtcIdentity parameter');
+    // return the resolved identity if it exists
+    this.resolvedIdentities.forEach((identity: Identity) => {
+      if (identity.rtcIdentity === rtcIdentity) {
+        console.log('[Idp getIdentity] identity already exists in:', this.resolvedIdentities);
+        return identity;
       }
+    });
 
-      // return the resolved identity if it exists
-      that.resolvedIdentities.forEach((identity: Identity) => {
-        if (identity.rtcIdentity === rtcIdentity) {
-          console.log('[Idp getIdentity] identity already exists in:', that.resolvedIdentities);
-          resolve(identity);
-          return; // needs to be here because resolve isn't leaving the function
+
+    // otherwise ask the remote idp
+    this.askRemoteIdp(rtcIdentity, credentials)
+      // both remote idp and msg download server answered correctly
+      .then((identity: Identity) => {
+        if (identity) {
+          return identity;
+        } else {
+          errorHandler('[Idp getIdentity] no identity resolved from remote idp');
+          return;
         }
+      })
+      .catch((error) => { // an error was thrown, possibly due to the network
+        errorHandler(error);
       });
-
-
-      // otherwise ask the remote idp
-      that.askRemoteIdp(rtcIdentity, credentials)
-        // both remote idp and msg download server answered correctly
-        .then((identity: Identity) => {
-          if (identity) {
-            resolve(identity);
-          } else {
-            errorHandler('[Idp getIdentity] no identity resolved from remote idp');
-          }
-        })
-        // an error was thrown, possibly due to the network
-        .catch((error) => {
-          errorHandler(error);
-        });
-
-    });
   }
-
-  /**
-   * @desc Return an Identities by searching resolved ones XOR resolve them on the fly
-   */
-  getIdentities(rtcIdentities: [{ rtcIdentity: string; credentials?: any }]): Promise<Identity[]> {
-    const resolvedIdentities: Identity[] = [];
-
-    rtcIdentities.forEach(identity => {
-      this.getIdentity(identity.rtcIdentity, identity.credentials).then(el => {
-        resolvedIdentities.push(el);
-      });
-    });
-
-    return new Promise((resolve) => {
-      resolve(resolvedIdentities);
-    });
-  }
-
 
   /**
    * @desc Resolve an identity by asking the remote idp for information
    */
-  private askRemoteIdp(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
-    return new Promise((resolve) => {
-      if (!rtcIdentity) {
-        errorHandler('[Idp askRemoteIdp] no rtcIdentity in parameter');
+  private async askRemoteIdp(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
+    if (!rtcIdentity) {
+      errorHandler('[Idp askRemoteIdp] no rtcIdentity in parameter');
+    }
+    console.log('[Idp askRemoteIdp] asking remote Idp...');
 
+    if (this.remoteIdp === 'webfinger') {
+      try {
+        const webfinger: typeof import('../../../../../node_modules/webfinger.js/src/webfinger.js') =
+        require('../../../../../node_modules/webfinger.js/src/webfinger.js');
+        console.log('[Idp askRemoteIdp] webfinger', webfinger);
+        return this.askWebFinger(webfinger, rtcIdentity, credentials)
+          .then((identity: Identity) => {
+            console.log('[Idp askRemoteIdp] webfinger resolved identity', identity);
+            return identity;
+          });
+      } catch (error) {
+        errorHandler(`[Idp askRemoteIdp] webfinger not found ${error}`);
       }
-      console.log('[Idp askRemoteIdp] asking remote Idp...');
-
-      if (this.remoteIdp === 'webfinger') {
-        try {
-          const webfinger: typeof import('../../../../../node_modules/webfinger.js/src/webfinger.js') =
-          require('../../../../../node_modules/webfinger.js/src/webfinger.js');
-          console.log('[Idp askRemoteIdp] webfinger', webfinger);
-          return this.askWebFinger(webfinger, rtcIdentity, credentials)
-            .then((identity: Identity) => {
-              console.log('[Idp askRemoteIdp] webfinger resolved identity', identity);
-              resolve(identity);
-            });
-        } catch (error) {
-          errorHandler(`[Idp askRemoteIdp] webfinger not found ${error}`);
-        }
-      } else {
-        this.askJsonpIdp(rtcIdentity, credentials);
-      }
-    });
+    } else {
+      return this.askJsonpIdp(rtcIdentity, credentials);
+    }
   }
 
   /**
    * @desc askWebFinger will search for identities using the webfinger protocol
    */
-  private askWebFinger(wf: IWebFinger, rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
+  private async askWebFinger(wf: IWebFinger, rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
     let localMsgStubUrl = null;
     let remoteMsgStubUrl = null;
     let messagingServer = null;
     let remoteMessagingServer = null;
     const codecs = {};
+    const webfinger = new wf({
+      webfist_fallback: false, // defaults to false, fallback to webfist
+      tls_only: false, // defaults to true
+      uri_fallback: true, // defaults to false
+      request_timeout: 10000, // defaults to 10000
+    });
 
-    return new Promise((resolve) => {
-      // using the webfinger class
+    return webfinger.lookup(rtcIdentity, (err, data) => {
+      if (err) {
+        errorHandler(`[Idp askRemoteIdp] error: ${err.message}`);
+      } else {
+        console.log('[Idp askRemoteIdp] found Webfinger entry for', rtcIdentity, 'data:', data);
 
-      const webfinger = new wf({
-        webfist_fallback: false, // defaults to false, fallback to webfist
-        tls_only: false, // defaults to true
-        uri_fallback: true, // defaults to false
-        request_timeout: 10000, // defaults to 10000
-      });
-
-      return webfinger.lookup(rtcIdentity, (err, data) => {
-        if (err) {
-          errorHandler(`[Idp askRemoteIdp] error: ${err.message}`);
-        } else {
-          console.log('[Idp askRemoteIdp] found Webfinger entry for', rtcIdentity, 'data:', data);
-
-          /**
-           * get the MessagingStub URL's
-           * possibly there are different URL's for local and remote stubs depending on the domain
-           */
-          for (const val in data.object.properties) {
-            if (data.object.properties.hasOwnProperty(val)) {
-              if (data.object.properties[val] === 'localStub') { localMsgStubUrl = val; }
-              if (data.object.properties[val] === 'remoteStub') { remoteMsgStubUrl = val; }
-              if (data.object.properties[val] === 'messagingServer') { messagingServer = val; }
-              if (data.object.properties[val] === 'messagingServer_remote') { remoteMessagingServer = val; }
-              if (data.object.properties[val].substr(0, 5) === 'codec') {
-                const codecKey = data.object.properties[val].substr(6); // cut 'codec_'
-                codecs[codecKey] = val;
-              }
+        /**
+         * get the MessagingStub URL's
+         * possibly there are different URL's for local and remote stubs depending on the domain
+         */
+        for (const val in data.object.properties) {
+          if (data.object.properties.hasOwnProperty(val)) {
+            if (data.object.properties[val] === 'localStub') { localMsgStubUrl = val; }
+            if (data.object.properties[val] === 'remoteStub') { remoteMsgStubUrl = val; }
+            if (data.object.properties[val] === 'messagingServer') { messagingServer = val; }
+            if (data.object.properties[val] === 'messagingServer_remote') { remoteMessagingServer = val; }
+            if (data.object.properties[val].substr(0, 5) === 'codec') {
+              const codecKey = data.object.properties[val].substr(6); // cut 'codec_'
+              codecs[codecKey] = val;
             }
           }
-          console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
-
-          if (remoteMsgStubUrl && remoteMessagingServer) {
-            const localDomain = this.myIdentity.split('@')[1];
-            const requestedDomain = rtcIdentity.split('@')[1];
-            if (localDomain !== requestedDomain) {
-              console.log(`[Idp askRemoteIdp] using remote MsgStub ${remoteMsgStubUrl} for identity: ${rtcIdentity}`);
-              localMsgStubUrl = remoteMsgStubUrl;
-              messagingServer = remoteMessagingServer;
-            }
-          }
-
-          this.getMsgStub(localMsgStubUrl)
-            // successfully resolved the messaging stub
-            .then((msgStub: IMessagingStub) => {
-              const identity = new Identity(
-                rtcIdentity,
-                this.remoteIdp,
-                msgStub,
-                localMsgStubUrl,
-                messagingServer,
-                codecs,
-                credentials
-              );
-              this.resolvedIdentities.push(identity); // store identity in array
-              resolve(identity); // return the identity
-            })
-            // failed to resolve the messaging stub
-            .catch((error) => {
-              errorHandler(error);
-            });
         }
-      });
+        console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
+
+        if (remoteMsgStubUrl && remoteMessagingServer) {
+          const localDomain = this.myIdentity.split('@')[1];
+          const requestedDomain = rtcIdentity.split('@')[1];
+          if (localDomain !== requestedDomain) {
+            console.log(`[Idp askRemoteIdp] using remote MsgStub ${remoteMsgStubUrl} for identity: ${rtcIdentity}`);
+            localMsgStubUrl = remoteMsgStubUrl;
+            messagingServer = remoteMessagingServer;
+          }
+        }
+
+        return this.getMsgStub(localMsgStubUrl);
+      }
+    })
+    .then((msgStub: IMessagingStub) => { // successfully resolved the messaging stub
+      const identity = new Identity(
+        rtcIdentity,
+        this.remoteIdp,
+        msgStub,
+        localMsgStubUrl,
+        messagingServer,
+        codecs,
+        credentials
+      );
+      this.resolvedIdentities.push(identity); // store identity in array
+      return identity; // return the identity
+    })
+    // failed to resolve the messaging stub
+    .catch((error) => {
+      errorHandler(error);
     });
   }
 
@@ -202,58 +170,48 @@ export class Idp {
   /**
    * @desc askOtherIdp is trying to connect to an IdP using the given IdP-options
    */
-  private askJsonpIdp(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
+  private async askJsonpIdp(rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
     let localMsgStubUrl = null;
     let messagingServer = null;
     const codecs = {};
 
-    return new Promise((resolve) => {
-      const stubUrl = `${this.remoteIdp}${rtcIdentity}`;
-      const data: IJsonIdp = require(stubUrl);
+    const stubUrl = `${this.remoteIdp}${rtcIdentity}`;
+    const data: IJsonIdp = require(stubUrl);
 
-      console.log('[Idp askJsonpIdp] remote idp answered: ', data);
-      localMsgStubUrl = data.rows[0].messagingStubURL;
-      messagingServer = data.rows[0].messagingServer;
+    console.log('[Idp askJsonpIdp] remote idp answered: ', data);
+    localMsgStubUrl = data.rows[0].messagingStubURL;
+    messagingServer = data.rows[0].messagingServer;
 
-      for (const val in data.rows[0]) {
-        if (val.substr(0, 5) === 'codec') {
-          const codecKey = val.substr(6); // cut 'codec_'
-          codecs[codecKey] = data.rows[0][val];
-          console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
-        }
+    for (const val in data.rows[0]) {
+      if (val.substr(0, 5) === 'codec') {
+        const codecKey = val.substr(6); // cut 'codec_'
+        codecs[codecKey] = data.rows[0][val];
+        console.log('[Idp askRemoteIdp] extracted codec URIs', codecs);
       }
+    }
 
-      this.getMsgStub(localMsgStubUrl)
-        // successfully resolved the messaging stub
-        .then((msgStub: IMessagingStub) => {
-          const identity = new Identity(rtcIdentity, this.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
-          this.resolvedIdentities.push(identity); // store identity in the idp
-          resolve(identity); // return the identity
-        })
-        // failed to resolve the messaging stub
-        .catch((error) => {
-          errorHandler(`[Idp askJsonpIdp] the messaging stub could not be loaded for ${rtcIdentity}: ${error}`);
-        });
-    });
+    return this.getMsgStub(localMsgStubUrl)
+      // successfully resolved the messaging stub
+      .then((msgStub: IMessagingStub) => {
+        const identity = new Identity(rtcIdentity, this.remoteIdp, msgStub, localMsgStubUrl, messagingServer, codecs, credentials);
+        this.resolvedIdentities.push(identity); // store identity in the idp
+        return identity; // return the identity
+      });
   }
 
   /**
    * @desc Resolve a messaging stub by asking a stub providing server
    */
-  private getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
+  private async getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
-
-    console.log(localMsgStubUrl);
-    return new Promise((resolve) => {
-      console.log('AAA');
-
-      const msgStub: IMessagingStub = require(localMsgStubUrl)
-        .then((stub: any) => {
-          console.log('[Idp getMsgStub] received stub: ', msgStub);
-          resolve(msgStub);
-        }, (err) => {
-          errorHandler(err);
-        });
-    });
+    const msgStub: IMessagingStub = require(localMsgStubUrl)
+      .then((stub: any) => {
+        console.log('[Idp getMsgStub] received stub: ', stub);
+        return stub;
+      })
+      .catch((err) => {
+        errorHandler(err);
+      });
+    return msgStub;
   }
 }
