@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Wonder } from 'wonder';
+import { Wonder } from '../../lib/src/wonder';
 
 @Component({
   selector: 'app-root',
@@ -14,10 +14,10 @@ export class AppComponent {
 
   login(loginData: string) {
     this.wonder.login(loginData)
-        .then(function(data) {
+        .then((data) => {
           console.log(data);
         })
-        .catch(function(error) {
+        .catch((error) => {
           console.log(error);
         });
   }

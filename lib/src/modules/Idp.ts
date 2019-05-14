@@ -78,8 +78,8 @@ export class Idp {
 
     if (this.remoteIdp === 'webfinger') {
       try {
-        const webfinger: typeof import('../../../../../node_modules/webfinger.js/src/webfinger.js') =
-        require('../../../../../node_modules/webfinger.js/src/webfinger.js');
+        const webfinger: typeof import('../../node_modules/webfinger.js/src/webfinger.js') =
+        require('../../node_modules/webfinger.js/src/webfinger.js');
         console.log('[Idp askRemoteIdp] webfinger', webfinger);
         return this.askWebFinger(webfinger, rtcIdentity, credentials)
           .then((identity: Identity) => {
@@ -176,7 +176,7 @@ export class Idp {
     const codecs = {};
 
     const stubUrl = `${this.remoteIdp}${rtcIdentity}`;
-    const data: IJsonIdp = require(stubUrl);
+    const data: IJsonIdp = require(`${stubUrl}`);
 
     console.log('[Idp askJsonpIdp] remote idp answered: ', data);
     localMsgStubUrl = data.rows[0].messagingStubURL;
@@ -204,7 +204,7 @@ export class Idp {
    */
   private async getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
-    const msgStub: IMessagingStub = require(localMsgStubUrl)
+    const msgStub: IMessagingStub = require(`${localMsgStubUrl}`)
       .then((stub: any) => {
         console.log('[Idp getMsgStub] received stub: ', stub);
         return stub;

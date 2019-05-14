@@ -148,7 +148,7 @@ export class Wonder {
    */
   async login(
     myRtcIdentity: string,
-    credentials: { [key: string]: any } | string,
+    credentials?: { [key: string]: any } | string,
     successCallback?: (identity: Identity) => void,
     errorCallback?: (errorMessage: string) => void
   ): Promise<Identity> {

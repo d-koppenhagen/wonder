@@ -120,41 +120,6 @@
           }
         }
       }
-    },
-    "wonder": {
-      "projectType": "library",
-      "root": "projects/wonder",
-      "sourceRoot": "projects/wonder/src",
-      "prefix": "lib",
-      "architect": {
-        "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
-          "options": {
-            "tsConfig": "projects/wonder/tsconfig.lib.json",
-            "project": "projects/wonder/ng-package.json"
-          }
-        },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
-          "options": {
-            "main": "projects/wonder/src/test.ts",
-            "tsConfig": "projects/wonder/tsconfig.spec.json",
-            "karmaConfig": "projects/wonder/karma.conf.js"
-          }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/wonder/tsconfig.lib.json",
-              "projects/wonder/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        }
-      }
     }
   },
   "defaultProject": "wonder-app"

@@ -183,7 +183,7 @@ export class DataChannelBroker {
     if (this.codecs && this.codecs[codecUrl]) {
       return this.codecs[codecUrl];
     } else { // if it isn't present download the codec with the URL
-      import(codecUrl).then((codec: ICodec) => {
+      require(`${codecUrl}`).then((codec: ICodec) => {
         this.codecs[codecUrl] = codec; // save it locally
         return codec; // and return it
       }, error => { // failed to receive the codec
