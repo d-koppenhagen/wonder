@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
-import { Wonder } from '../../lib/src/wonder';
+import { Wonder } from 'lib/dist/wonder.min';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  providers: [ Wonder ]
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  constructor(public wonder: Wonder) {
-    console.log(wonder);
+  wonder: Wonder;
+
+  constructor() {
+    this.wonder = new Wonder();
   }
 
   login(loginData: string) {

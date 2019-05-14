@@ -2,7 +2,16 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MaterialModule } from '@angular/material';
+import {
+  MatGridListModule,
+  MatToolbarModule,
+  MatCardModule,
+  MatButtonModule,
+  MatFormFieldModule,
+  MatInputModule,
+  MatIconModule,
+  MatListModule
+} from '@angular/material';
 import 'hammerjs';
 
 import { AppComponent } from './app.component';
@@ -21,7 +30,14 @@ import { CallFormComponent } from './call-form/call-form.component';
   ],
   imports: [
     BrowserModule,
-    MaterialModule,
+    MatGridListModule,
+    MatToolbarModule,
+    MatCardModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatListModule,
     BrowserAnimationsModule,
     FormsModule
   ],

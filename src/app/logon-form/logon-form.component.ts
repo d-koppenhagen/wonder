@@ -3,7 +3,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 @Component({
   selector: 'app-logon-form',
   templateUrl: './logon-form.component.html',
-  styleUrls: ['./logon-form.component.css']
+  styleUrls: ['./logon-form.component.scss']
 })
 export class LogonFormComponent implements OnInit {
   @Output() data: EventEmitter<any> = new EventEmitter();

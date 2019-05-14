@@ -3,11 +3,12 @@
   "version": "0.0.1",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "npm run build:wonder && ng serve",
+    "build": "npm run build:wonder && ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "build:wonder": "cd lib && npm run build && cd ../"
   },
   "authors": [
     "Danny Koppenhagen <mail@d-koppenhagen.de>",
