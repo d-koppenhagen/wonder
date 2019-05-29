@@ -77,18 +77,18 @@ export class Idp {
     console.log('[Idp askRemoteIdp] asking remote Idp...');
 
     if (this.remoteIdp === 'webfinger') {
-      try {
-        const webfinger: typeof import('../../node_modules/webfinger.js/src/webfinger.js') =
-        require('../../node_modules/webfinger.js/src/webfinger.js');
-        console.log('[Idp askRemoteIdp] webfinger', webfinger);
-        return this.askWebFinger(webfinger, rtcIdentity, credentials)
+      import('../../node_modules/webfinger.js/src/webfinger.js').then(m => {
+        console.log('[Idp askRemoteIdp] webfinger', m.webfinger);
+        return this.askWebFinger(m.webfinger, rtcIdentity, credentials)
           .then((identity: Identity) => {
             console.log('[Idp askRemoteIdp] webfinger resolved identity', identity);
             return identity;
+          })
+          .catch((error: any) => {
+            errorHandler(`[Idp askRemoteIdp] webfinger not found ${error}`);
+            return;
           });
-      } catch (error) {
-        errorHandler(`[Idp askRemoteIdp] webfinger not found ${error}`);
-      }
+      });
     } else {
       return this.askJsonpIdp(rtcIdentity, credentials);
     }
@@ -176,7 +176,7 @@ export class Idp {
     const codecs = {};
 
     const stubUrl = `${this.remoteIdp}${rtcIdentity}`;
-    const data: IJsonIdp = require(`${stubUrl}`);
+    const data = await import(`${stubUrl}`).then((m: IJsonIdp) => m);
 
     console.log('[Idp askJsonpIdp] remote idp answered: ', data);
     localMsgStubUrl = data.rows[0].messagingStubURL;
@@ -204,14 +204,12 @@ export class Idp {
    */
   private async getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
-    const msgStub: IMessagingStub = require(`${localMsgStubUrl}`)
-      .then((stub: any) => {
-        console.log('[Idp getMsgStub] received stub: ', stub);
-        return stub;
+    return import(`${localMsgStubUrl}`).then((m) => {
+        console.log('[Idp getMsgStub] received stub: ', m);
+        return m;
       })
       .catch((err) => {
         errorHandler(err);
       });
-    return msgStub;
   }
 }

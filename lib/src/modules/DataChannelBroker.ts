@@ -183,12 +183,19 @@ export class DataChannelBroker {
     if (this.codecs && this.codecs[codecUrl]) {
       return this.codecs[codecUrl];
     } else { // if it isn't present download the codec with the URL
-      require(`${codecUrl}`).then((codec: ICodec) => {
+      import(`${codecUrl}`).then((codec: ICodec) => {
         this.codecs[codecUrl] = codec; // save it locally
         return codec; // and return it
       }, error => { // failed to receive the codec
         errorHandler(`[DataChannelBroker getCodec] the codec could not be retrieved from the remote server: ${error}`);
       });
+
+      /*require(`${codecUrl}`).then((codec: ICodec) => {
+        this.codecs[codecUrl] = codec; // save it locally
+        return codec; // and return it
+      }, error => { // failed to receive the codec
+        errorHandler(`[DataChannelBroker getCodec] the codec could not be retrieved from the remote server: ${error}`);
+      });*/
     }
   }
 

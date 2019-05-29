@@ -5,9 +5,11 @@ import { Conversation } from './Conversation';
 import { errorHandler } from './helpfunctions';
 
 export class CallMultiple {
-  static async call(wonderInstance: Wonder, recipients: string[], conversation: Conversation, demand: IDemand) {
+  static async call(wonderInstance: Wonder, recipients: string[], conversation: Conversation, demand: IDemand): Promise<any> {
 
     console.log('[CallMultiple] Multiparty call to', recipients, 'with', demand);
+    // TODO: implement multiparty support
+    errorHandler('[wonder call] multiparty no yet implemented');
 
     if (!(recipients instanceof Array)) {
       return new Error('[CallMultiple] recipients has to be an array of Receipient');
