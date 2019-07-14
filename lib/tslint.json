@@ -6,8 +6,6 @@
     "deprecation": {
       "severity": "warn"
     },
-    "component-class-suffix": true,
-    "contextual-lifecycle": true,
     "interface-name": false,
     "max-classes-per-file": false,
     "max-line-length": [
