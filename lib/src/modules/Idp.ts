@@ -77,9 +77,9 @@ export class Idp {
     console.log('[Idp askRemoteIdp] asking remote Idp...');
 
     if (this.remoteIdp === 'webfinger') {
-      import('../../node_modules/webfinger.js/src/webfinger.js').then(m => {
-        console.log('[Idp askRemoteIdp] webfinger', m.webfinger);
-        return this.askWebFinger(m.webfinger, rtcIdentity, credentials)
+      import('webfinger-client').then(m => {
+        console.log('[Idp askRemoteIdp] webfinger', );
+        return this.askWebFinger(m.WebFinger, rtcIdentity, credentials)
           .then((identity: Identity) => {
             console.log('[Idp askRemoteIdp] webfinger resolved identity', identity);
             return identity;
@@ -97,7 +97,7 @@ export class Idp {
   /**
    * @desc askWebFinger will search for identities using the webfinger protocol
    */
-  private async askWebFinger(wf: IWebFinger, rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
+  private async askWebFinger(wf: any, rtcIdentity: string, credentials?: { [key: string]: any } | string): Promise<Identity> {
     let localMsgStubUrl = null;
     let remoteMsgStubUrl = null;
     let messagingServer = null;
@@ -109,6 +109,8 @@ export class Idp {
       uri_fallback: true, // defaults to false
       request_timeout: 10000, // defaults to 10000
     });
+
+    console.log('CCCCCC', webfinger);
 
     return webfinger.lookup(rtcIdentity, (err, data) => {
       if (err) {
@@ -144,25 +146,25 @@ export class Idp {
           }
         }
 
-        return this.getMsgStub(localMsgStubUrl);
+        return this.getMsgStub(localMsgStubUrl)
+          .then((msgStub: IMessagingStub) => { // successfully resolved the messaging stub
+            const identity = new Identity(
+              rtcIdentity,
+              this.remoteIdp,
+              msgStub,
+              localMsgStubUrl,
+              messagingServer,
+              codecs,
+              credentials
+            );
+            this.resolvedIdentities.push(identity); // store identity in array
+            return identity; // return the identity
+          })
+          // failed to resolve the messaging stub
+          .catch((error) => {
+            errorHandler(error);
+          });
       }
-    })
-    .then((msgStub: IMessagingStub) => { // successfully resolved the messaging stub
-      const identity = new Identity(
-        rtcIdentity,
-        this.remoteIdp,
-        msgStub,
-        localMsgStubUrl,
-        messagingServer,
-        codecs,
-        credentials
-      );
-      this.resolvedIdentities.push(identity); // store identity in array
-      return identity; // return the identity
-    })
-    // failed to resolve the messaging stub
-    .catch((error) => {
-      errorHandler(error);
     });
   }
 
@@ -204,7 +206,7 @@ export class Idp {
    */
   private async getMsgStub(localMsgStubUrl: string): Promise<IMessagingStub> {
     console.log('[Idp getMsgStub] asking stub server for an implementation: ', localMsgStubUrl);
-    return import(`${localMsgStubUrl}`).then((m) => {
+    return await import(`${localMsgStubUrl}`).then((m) => {
         console.log('[Idp getMsgStub] received stub: ', m);
         return m;
       })

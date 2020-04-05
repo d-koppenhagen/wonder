@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Wonder } from 'lib/dist/wonder.min';
+import { Wonder } from 'lib/dist/wonder';
 
 @Component({
   selector: 'app-root',
