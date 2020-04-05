@@ -34,7 +34,6 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "webfinger.js": "^2.7.0",
-    "webrtc-adapter": "^7.5.1"
+    "webfinger.js": "^2.7.0"
   }
 }

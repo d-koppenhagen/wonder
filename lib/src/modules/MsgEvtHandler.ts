@@ -1,5 +1,3 @@
-import { attachMediaStream } from 'webrtc-adapter';
-
 import { Wonder } from '../wonder';
 import { Conversation } from './Conversation';
 import { Demand } from './Demand';
@@ -314,10 +312,11 @@ export class MsgEvtHandler {
         return navigator.mediaDevices.getUserMedia(msg.misc.demand.in);
       })
       .then((stream: MediaStream) => {
-        attachMediaStream(document.getElementById('localVideo'), stream);
         stream.getTracks().forEach((track) => {
           conversation.myParticipant.peerConnection.addTrack(track, stream);
         });
+        const videoElement = document.getElementById('localVideo') as HTMLMediaElement;
+        videoElement.srcObject = stream;
       })
       .then(() => {
         return conversation.myParticipant.peerConnection.createAnswer();
